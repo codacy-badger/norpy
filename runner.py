@@ -29,6 +29,9 @@ FLAGS_DEBUG += ['-cpp', '-Wcharacter-truncation', '-Wimplicit-interface']
 
 if True:
 
+    cmd = 'git clean -df'
+    os.system(cmd)
+
     # We need to process in two steps. First we compile a library and then use it in a special
     # F2PY interface for Python.
     os.chdir('norpy/src')
@@ -51,7 +54,7 @@ if True:
 from norpy.src.norpy_hatchery import f2py_calculate_immediate_rewards
 from norpy.src.norpy_hatchery import f2py_create_state_space
 
-for _ in range(1):
+for _ in range(1000):
     print(_)
     # We want to set up a basic testing infrastructure for the state space creation.
     num_periods = np.random.randint(1, 10)

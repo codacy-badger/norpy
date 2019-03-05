@@ -7,39 +7,40 @@ SUBROUTINE f2py_create_state_space(states_all, states_number_period, mapping_sta
 
     !/* dummy arguments        */
 
-    INTEGER, INTENT(OUT)            :: mapping_state_idx(num_periods, num_periods, num_periods, min_idx_int, 4, num_types)
-    INTEGER, INTENT(OUT)            :: states_all(num_periods, 500000, 5)
-    INTEGER, INTENT(OUT)            :: states_number_period(num_periods)
-    INTEGER, INTENT(OUT)            :: max_states_period
+    INTEGER, INTENT(OUT) :: mapping_state_idx(num_periods, num_periods, num_periods, min_idx_int, 4, num_types)
+    INTEGER, INTENT(OUT) :: states_all(num_periods, 500000, 5)
+    INTEGER, INTENT(OUT) :: states_number_period(num_periods)
+    INTEGER, INTENT(OUT) :: max_states_period
 
-    INTEGER, INTENT(IN)             :: edu_spec_start(:)
-    INTEGER, INTENT(IN)             :: edu_spec_max
-    INTEGER, INTENT(IN)             :: min_idx_int
-    INTEGER, INTENT(IN)             :: num_periods
-    INTEGER, INTENT(IN)             :: num_types
+    INTEGER, INTENT(IN) :: edu_spec_start(:)
+    INTEGER, INTENT(IN) :: edu_spec_max
+    INTEGER, INTENT(IN) :: min_idx_int
+    INTEGER, INTENT(IN) :: num_periods
+    INTEGER, INTENT(IN) :: num_types
 
     !/* local variables        */
 
-    INTEGER                         :: choice_lagged
-    INTEGER                         :: num_edu_start
-    INTEGER                         :: edu_start
-    INTEGER                         :: edu_add
-    INTEGER                         :: period
-    INTEGER                         :: type_
-    INTEGER                         :: exp_a
-    INTEGER                         :: exp_b
-    INTEGER                         :: k
-    INTEGER                         :: j
+    INTEGER :: choice_lagged
+    INTEGER :: num_edu_start
+    INTEGER :: edu_start
+    INTEGER :: edu_add
+    INTEGER :: period
+    INTEGER :: type_
+    INTEGER :: exp_a
+    INTEGER :: exp_b
+    INTEGER :: k
+    INTEGER :: j
 
-!***************************************************************************************************
-!***************************************************************************************************
+    !-----------------------------------------------------------------------------------------------
+    ! Algorithm
+    !-----------------------------------------------------------------------------------------------
 
     ! Construct auxiliary objects
     num_edu_start = SIZE(edu_spec_start)
 
     ! Initialize output
     states_number_period = MISSING_INT
-    mapping_state_idx    = MISSING_INT
+    mapping_state_idx = MISSING_INT
     states_all = MISSING_INT
 
     ! ! Construct state space by periods
@@ -102,10 +103,10 @@ SUBROUTINE f2py_create_state_space(states_all, states_number_period, mapping_sta
                                 IF ((choice_lagged .EQ. two_int) .AND. (exp_b .EQ. zero_int)) CYCLE
 
                                 ! ! If we have multiple initial conditions it might well be the case that we have a duplicate state, i.e. the same state is possible with other initial condition that period.
-                                IF (mapping_state_idx(period + 1, exp_a + 1, exp_b + 1, edu_start + edu_add + 1 , choice_lagged, type_ + 1) .NE. MISSING_INT) CYCLE
+                                IF (mapping_state_idx(period + 1, exp_a + 1, exp_b + 1, edu_start + edu_add + 1, choice_lagged, type_ + 1) .NE. MISSING_INT) CYCLE
 
                                 ! ! Collect mapping of state space to array index.
-                                mapping_state_idx(period + 1, exp_a + 1, exp_b + 1, edu_start + edu_add + 1 , choice_lagged, type_ + 1) = k
+                                mapping_state_idx(period + 1, exp_a + 1, exp_b + 1, edu_start + edu_add + 1, choice_lagged, type_ + 1) = k
 
                                 ! Collect all possible realizations of state space
                                 states_all(period + 1, k + 1, :) = (/ exp_a, exp_b, edu_start + edu_add, choice_lagged, type_ /)
@@ -146,105 +147,106 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
 
     !/* dummy arguments   */
 
-    DOUBLE PRECISION, INTENT(OUT)   :: periods_rewards_systematic(num_periods, max_states_period, 4)
+    DOUBLE PRECISION, INTENT(OUT) :: periods_rewards_systematic(num_periods, max_states_period, 4)
 
-    DOUBLE PRECISION, INTENT(IN)    :: type_spec_shifts(:, :)
-    DOUBLE PRECISION, INTENT(IN)    :: coeffs_common(2)
-    DOUBLE PRECISION, INTENT(IN)    :: coeffs_home(3)
-    DOUBLE PRECISION, INTENT(IN)    :: coeffs_edu(7)
-    DOUBLE PRECISION, INTENT(IN)    :: coeffs_a(15)
-    DOUBLE PRECISION, INTENT(IN)    :: coeffs_b(15)
+    DOUBLE PRECISION, INTENT(IN) :: type_spec_shifts(:, :)
+    DOUBLE PRECISION, INTENT(IN) :: coeffs_common(2)
+    DOUBLE PRECISION, INTENT(IN) :: coeffs_home(3)
+    DOUBLE PRECISION, INTENT(IN) :: coeffs_edu(7)
+    DOUBLE PRECISION, INTENT(IN) :: coeffs_a(15)
+    DOUBLE PRECISION, INTENT(IN) :: coeffs_b(15)
 
-    INTEGER, INTENT(IN)             :: states_number_period(:)
-    INTEGER, INTENT(IN)             :: max_states_period
-    INTEGER, INTENT(IN)             :: states_all(:, :, :)
-    INTEGER, INTENT(IN)             :: num_periods
+    INTEGER, INTENT(IN) :: states_number_period(:)
+    INTEGER, INTENT(IN) :: states_all(:, :, :)
+    INTEGER, INTENT(IN) :: max_states_period
+    INTEGER, INTENT(IN) :: num_periods
 
     !/* local variables        */
 
-    INTEGER                    :: choice_lagged
+    INTEGER :: choice_lagged
 
-    INTEGER                     :: covars_home(3)
-    INTEGER                    :: covars_edu(7)
-    INTEGER                     :: period
-    INTEGER                     :: type_
-    INTEGER                  :: exp_a
-    INTEGER                    :: exp_b
-    INTEGER                     :: edu
-    INTEGER                    :: k
-    INTEGER                     :: i
+    INTEGER :: covars_home(3)
+    INTEGER :: covars_edu(7)
+    INTEGER :: period
+    INTEGER :: type_
+    INTEGER :: exp_a
+    INTEGER :: exp_b
+    INTEGER :: edu
+    INTEGER :: k
+    INTEGER :: i
 
-    DOUBLE PRECISION                      :: rewards_general(2)
-    DOUBLE PRECISION                      :: rewards_common
-    DOUBLE PRECISION                      :: rewards(4)
-    DOUBLE PRECISION                      :: wages(2)
+    DOUBLE PRECISION :: rewards_general(2)
+    DOUBLE PRECISION :: rewards_common
+    DOUBLE PRECISION :: rewards(4)
+    DOUBLE PRECISION :: wages(2)
 
-        TYPE(COVARIATES_DICT)           :: covariates
+    TYPE(COVARIATES_DICT) :: covariates
 
-!***************************************************************************************************
-!***************************************************************************************************
+    !-----------------------------------------------------------------------------------------------
+    ! Algorithm
+    !-----------------------------------------------------------------------------------------------
 
-      periods_rewards_systematic = MISSING_FLOAT
+    periods_rewards_systematic = MISSING_FLOAT
 
-      ! Calculate systematic instantaneous rewards
-      DO period = num_periods, 1, -1
+    ! Calculate systematic instantaneous rewards
+    DO period = num_periods, 1, -1
 
-          DO k = 1, states_number_period(period)
+        DO k = 1, states_number_period(period)
 
-              ! Distribute state space
-              exp_a = states_all(period, k, 1)
-              exp_b = states_all(period, k, 2)
-              edu = states_all(period, k, 3)
-              choice_lagged = states_all(period, k, 4)
-              type_ = states_all(period, k, 5)
+            ! Distribute state space
+            exp_a = states_all(period, k, 1)
+            exp_b = states_all(period, k, 2)
+            edu = states_all(period, k, 3)
+            choice_lagged = states_all(period, k, 4)
+            type_ = states_all(period, k, 5)
 
-               ! Construct auxiliary information
-             covariates = construct_covariates(exp_a, exp_b, edu, choice_lagged, type_, period)
+            ! Construct auxiliary information
+            covariates = construct_covariates(exp_a, exp_b, edu, choice_lagged, type_, period)
 
-               ! Calculate common and general rewards component.
-               rewards_general = calculate_rewards_general(covariates, coeffs_a(13:15), coeffs_b(13:15))
-               rewards_common = calculate_rewards_common(covariates, coeffs_common)
+            ! Calculate common and general rewards component.
+            rewards_general = calculate_rewards_general(covariates, coeffs_a(13:15), coeffs_b(13:15))
+            rewards_common = calculate_rewards_common(covariates, coeffs_common)
 
-               ! Calculate the systematic part of OCCUPATION A and OCCUPATION B rewards. these are defined in a general sense, where not only wages matter.
-               wages = calculate_wages_systematic(covariates, coeffs_a, coeffs_b, type_spec_shifts)
+            ! Calculate the systematic part of OCCUPATION A and OCCUPATION B rewards. these are defined in a general sense, where not only wages matter.
+            wages = calculate_wages_systematic(covariates, coeffs_a, coeffs_b, type_spec_shifts)
 
-               DO i = 1, 2
-                   rewards(i) = wages(i) + rewards_general(i)
-               END DO
+            DO i = 1, 2
+                rewards(i) = wages(i) + rewards_general(i)
+            END DO
 
-               ! Calculate systematic part of schooling utility
-               covars_edu(1) = one_int
-               covars_edu(2) = covariates%hs_graduate
-               covars_edu(3) = covariates%co_graduate
-               covars_edu(4) = covariates%is_return_not_high_school
-               covars_edu(5) = covariates%is_return_high_school
-               covars_edu(6) = covariates%period - one_int
-               covars_edu(7) = covariates%is_mandatory
+            ! Calculate systematic part of schooling utility
+            covars_edu(1) = one_int
+            covars_edu(2) = covariates%hs_graduate
+            covars_edu(3) = covariates%co_graduate
+            covars_edu(4) = covariates%is_return_not_high_school
+            covars_edu(5) = covariates%is_return_high_school
+            covars_edu(6) = covariates%period - one_int
+            covars_edu(7) = covariates%is_mandatory
 
-               rewards(3) = DOT_PRODUCT(covars_edu, coeffs_edu)
+            rewards(3) = DOT_PRODUCT(covars_edu, coeffs_edu)
 
-               ! Calculate systematic part of HOME
-               covars_home(1) = one_int
-               covars_home(2) = covariates%is_young_adult
-               covars_home(3) = covariates%period - one_int
+            ! Calculate systematic part of HOME
+            covars_home(1) = one_int
+            covars_home(2) = covariates%is_young_adult
+            covars_home(3) = covariates%period - one_int
 
-               rewards(4) = DOT_PRODUCT(covars_home, coeffs_home)
+            rewards(4) = DOT_PRODUCT(covars_home, coeffs_home)
 
-               ! Now we add the type-specific deviation.
-               DO i = 3, 4
-                   rewards(i) = rewards(i) + type_spec_shifts(type_ + 1, i)
-               END DO
+            ! Now we add the type-specific deviation.
+            DO i = 3, 4
+                rewards(i) = rewards(i) + type_spec_shifts(type_ + 1, i)
+            END DO
 
-               ! We can now also added the common component of rewards.
-               DO i = 1, 4
-                   rewards(i) = rewards(i) + rewards_common
-               END DO
+            ! We can now also added the common component of rewards.
+            DO i = 1, 4
+                rewards(i) = rewards(i) + rewards_common
+            END DO
 
-               periods_rewards_systematic(period, k, :) = rewards
+            periods_rewards_systematic(period, k, :) = rewards
 
-           END DO
+        END DO
 
-       END DO
+    END DO
 
 END SUBROUTINE
 !***************************************************************************************************
