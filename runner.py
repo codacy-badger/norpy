@@ -90,3 +90,4 @@ for _ in range(1000):
     args += [coeffs_common, coeffs_a, coeffs_b, coeffs_edu, coeffs_home, type_spec_shifts]
 
     f2py_calculate_immediate_rewards(*args)
+
