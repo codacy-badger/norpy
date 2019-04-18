@@ -5,12 +5,10 @@ RESPY adjustments in the SMM and MLE estimation and then add the additional stat
 
 ## Next steps
 
-* Removing Occupation B from the backward procedure. Occ_B ha been removed from the state space 
-creation and from the function that calculates immediate rewards. The same procedure has to be performed on the
-backward induction and the function that calculates future rewards.
+current PR:
+* set up regression tests
+* establish model specification object
 
-* Improve Testing Infrastructure and create a unified and sound interface. All tests are on the 
-testing infrastructure at the moment. All components of norpy_hatchery are tested from different 
-perspectives in there. One thing that remains to be done is to clean the file up and avoid any 
-duplication. I want to clean up the testing setup in SOEPY and then we can work with Boryana to 
-implement the ideas here as well.
+afterwards:
+* refactor F2PY interfaces (peisenha)
+* set up the rest of testing infrastructure
