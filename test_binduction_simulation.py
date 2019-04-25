@@ -59,7 +59,7 @@ from auxiliary import HUGE_FLOAT
 
 # np.random.seed(123)
 
-for _ in range(1000):
+for _ in range(10):
     print("succesfully completed {}th trial ".format(_))
     # We want to set up a basic testing infrastructure for the state space creation.
     num_periods = np.random.randint(1, 10)
@@ -187,7 +187,7 @@ for _ in range(1000):
 #####Now do the same for any period!
 
 
-for _ in range(1000):
+for _ in range(10):
     print("succesfully completed {}th trial ".format(_))
     # We want to set up a basic testing infrastructure for the state space creation.
     num_periods = np.random.randint(2, 10)
@@ -343,7 +343,7 @@ for _ in range(1000):
     )
 
 
-for _ in range(1000):
+for _ in range(10):
     print("succesfully completed {}th trial ".format(_))
     # We want to set up a basic testing infrastructure for the state space creation.
     num_periods = np.random.randint(2, 10)
@@ -451,7 +451,7 @@ for _ in range(1000):
 # Check for arr
 
 
-for _ in range(1000):
+for _ in range(100000):
     print("succesfully completed {}th trial ".format(_))
     # We want to set up a basic testing infrastructure for the state space creation.
     num_periods = np.random.randint(2, 10)
@@ -470,7 +470,7 @@ for _ in range(1000):
     coeffs_home = np.random.uniform(size=3)
     coeffs_edu = np.random.uniform(size=7)
     coeffs_work = np.concatenate(
-        (np.random.uniform(size=10), np.array([200000000000, 0, 0]))
+        (np.random.uniform(size=10), np.array([2000000000000000, 0, 0]))
     )
 
     num_agents_sim = np.random.randint(10, 100)
@@ -521,9 +521,9 @@ for _ in range(1000):
     args = (np.zeros(3), shocks_cov, (num_periods, num_agents_sim))
     periods_draws_sims = np.random.multivariate_normal(*args)
     periods_draws_sims[:, :, :2] = np.clip(
-        np.exp(periods_draws_sims[:, :, :2]), 0.0, 2000
+        np.exp(periods_draws_sims[:, :, :2]), 0.0, 20000
     )
-    print(periods_draws_sims[:, :, :2])
+    
 
     sample_lagged_start = np.random.choice([3, 3], p=[0.1, 0.9], size=num_agents_sim)
     sample_edu_start = np.random.choice(edu_spec_start, size=num_agents_sim)
@@ -550,9 +550,10 @@ for _ in range(1000):
     agent_to_check = np.random.randint(0, num_agents_sim)
     period_to_check = np.random.randint(0, num_periods - 1)
 
-    
-    
-    # print(dat[num_periods*(agent_to_check-1)+period_to_check,2])
+    print(dat[num_periods * (agent_to_check - 1) + period_to_check, 8:11])
+    print(dat[num_periods * (agent_to_check - 1) + period_to_check, 14:17])
+    print(dat[num_periods * (agent_to_check - 1) + period_to_check, 8:11])
+    print(dat[num_periods*(agent_to_check-1)+period_to_check,2])
     assert dat[(agent_to_check-1)*num_periods+period_to_check,2] == 1
     # Todo:check for high common, check agent identifier, check period ident
     
