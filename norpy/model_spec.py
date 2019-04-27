@@ -53,6 +53,9 @@ class ModelSpec(typing.NamedTuple):
     delta: float
     periods_draws_emax: np.ndarray
     periods_draws_sims: np.ndarray
+    sample_lagged_start: np.ndarray
+    sample_edu_start : np.ndarray
+    sample_types: np.ndarray
 
     # We make some of the private methods of the base class
     # public.
@@ -103,7 +106,10 @@ class ModelSpec(typing.NamedTuple):
                 "edu_spec_start",
                 "shocks_cov",
                 "periods_draws_emax",
-                "periods_draws_sims"
+                "periods_draws_sims",
+                "sample_lagged_start",
+                "sample_edu_start",
+                "sample_types"
             ]:
                 assert isinstance(attr, np.ndarray)
             else:
@@ -187,7 +193,10 @@ def get_random_model_specification(constr=None):
             "type_spec_shifts",
             "shocks_cov",
             "periods_draws_emax",
-            "periods_draws_sims"
+            "periods_draws_sims",
+            "sample_lagged_start",
+            "sample_edu_start",
+            "sample_types"
 
         ]
         for x in list_of_var:
@@ -224,6 +233,12 @@ def get_random_model_specification(constr=None):
     init_dict["periods_draws_sims"] = np.random.multivariate_normal(*args)
     init_dict["periods_draws_sims"][:, :, :2] = np.clip(np.exp(init_dict["periods_draws_sims"][:, :, :2]), 0.0,
                                                         HUGE_FLOAT)
+
+    init_dict["sample_lagged_start"] = np.random.choice([3, 3], p=[0.1, 0.9], size=init_dict["num_agents_sim"])
+
+    init_dict["sample_edu_start"] = np.random.choice(init_dict["edu_spec_start"], size=init_dict["num_agents_sim"])
+
+    init_dict["sample_types"] = np.random.choice(range(init_dict["num_types"]), size=init_dict["num_agents_sim"])
 
     process_constraints(constr)
 

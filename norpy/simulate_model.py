@@ -154,9 +154,9 @@ def simulate(model_object):
     #periods_draws_sims = return_simulated_shocks(model_object,True)
     periods_emax = backward_induction_procedure(model_object,state_space_info,periods_rewards_systematic, model_object.periods_draws_emax)
 
-    sample_lagged_start = np.random.choice([3, 3], p=[0.1, 0.9], size=model_object.num_agents_sim)
-    sample_edu_start = np.random.choice(model_object.edu_spec_start, size=model_object.num_agents_sim)
-    sample_types = np.random.choice(range(model_object.num_types), size=model_object.num_agents_sim)
+    #sample_lagged_start = np.random.choice([3, 3], p=[0.1, 0.9], size=model_object.num_agents_sim)
+    #sample_edu_start = np.random.choice(model_object.edu_spec_start, size=model_object.num_agents_sim)
+    #sample_types = np.random.choice(range(model_object.num_types), size=model_object.num_agents_sim)
 
     args = [state_space_info["states_all"], state_space_info["mapping_state_idx"],
             periods_rewards_systematic, periods_emax,
@@ -164,7 +164,8 @@ def simulate(model_object):
             model_object.periods_draws_sims, model_object.edu_spec_max,
             model_object.coeffs_common,
             model_object.coeffs_work, model_object.delta,
-            sample_edu_start, sample_types, sample_lagged_start]
+            model_object.sample_edu_start, model_object.sample_types,
+            model_object.sample_lagged_start]
 
     dat = f2py_simulate(*args)
 
