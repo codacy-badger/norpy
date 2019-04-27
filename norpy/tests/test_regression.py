@@ -5,8 +5,6 @@ import numpy as np
 
 from norpy.simulate_model import simulate
 from norpy.norpy_config import TEST_RESOURCES_DIR
-from soepy.test.auxiliary import cleanup
-from soepy.test.random_init import print_dict
 from norpy.model_spec import get_model_obj, get_random_model_specification
 
 def test1():

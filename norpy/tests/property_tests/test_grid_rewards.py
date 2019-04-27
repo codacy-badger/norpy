@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 Test the full module!!
-
-
 """
 import os
 
