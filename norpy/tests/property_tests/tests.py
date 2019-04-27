@@ -3,6 +3,9 @@
 """
 Parametize the test functions 
 
+TODO: Is that one just the same as test_grid_rewards??
+Check if so then erase it !
+
 """
 
 import os
@@ -45,8 +48,8 @@ if True:
 
     os.chdir("../")
 
-from norpy.src.norpy_hatchery import f2py_calculate_immediate_rewards
-from norpy.src.norpy_hatchery import f2py_create_state_space
+from norpy.solve.norpy_hatchery import f2py_calculate_immediate_rewards
+from norpy.solve.norpy_hatchery import f2py_create_state_space
 
 
 def set_up_state_space(boolean):

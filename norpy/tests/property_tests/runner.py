@@ -60,16 +60,16 @@ if True:
     os.chdir('../../')
 
 
-from norpy.src.norpy_hatchery import f2py_calculate_immediate_rewards
-from norpy.src.norpy_hatchery import f2py_create_state_space
-from norpy.src.norpy_hatchery import f2py_backward_induction
-from norpy.src.norpy_hatchery import f2py_simulate
+from norpy.solve.norpy_hatchery import f2py_calculate_immediate_rewards
+from norpy.solve.norpy_hatchery import f2py_create_state_space
+from norpy.solve.norpy_hatchery import f2py_backward_induction
+from norpy.solve.norpy_hatchery import f2py_simulate
 
-from auxiliary import DATA_FORMATS_SIM
-from auxiliary import DATA_LABELS_SIM
-from auxiliary import MISSING_FLOAT
-from auxiliary import MISSING_INT
-from auxiliary import HUGE_FLOAT
+from norpy.tests.auxiliary import DATA_FORMATS_SIM
+from norpy.tests.auxiliary import DATA_LABELS_SIM
+from norpy.tests.auxiliary import MISSING_FLOAT
+from norpy.tests.auxiliary import MISSING_INT
+from norpy.tests.auxiliary import HUGE_FLOAT
 
 np.random.seed(123)
 

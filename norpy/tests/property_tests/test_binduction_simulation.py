@@ -45,17 +45,17 @@ if True:
 
     os.chdir("../../")
 
-from norpy.src.norpy_hatchery import f2py_calculate_immediate_rewards
-from norpy.src.norpy_hatchery import f2py_create_state_space
-from norpy.src.norpy_hatchery import f2py_backward_induction
-from norpy.src.norpy_hatchery import f2py_simulate
+from norpy.solve.norpy_hatchery import f2py_calculate_immediate_rewards
+from norpy.solve.norpy_hatchery import f2py_create_state_space
+from norpy.solve.norpy_hatchery import f2py_backward_induction
+from norpy.solve.norpy_hatchery import f2py_simulate
 
 
-from auxiliary import DATA_FORMATS_SIM
-from auxiliary import DATA_LABELS_SIM
-from auxiliary import MISSING_FLOAT
-from auxiliary import MISSING_INT
-from auxiliary import HUGE_FLOAT
+from norpy.tests.auxiliary import DATA_FORMATS_SIM
+from norpy.tests.auxiliary import DATA_LABELS_SIM
+from norpy.tests.auxiliary import MISSING_FLOAT
+from norpy.tests.auxiliary import MISSING_INT
+from norpy.tests.auxiliary import HUGE_FLOAT
 
 # np.random.seed(123)
 
@@ -451,7 +451,7 @@ for _ in range(10):
 # Check for arr
 
 
-for _ in range(100000):
+for _ in range(10):
     print("succesfully completed {}th trial ".format(_))
     # We want to set up a basic testing infrastructure for the state space creation.
     num_periods = np.random.randint(2, 10)
@@ -550,9 +550,10 @@ for _ in range(100000):
     agent_to_check = np.random.randint(0, num_agents_sim)
     period_to_check = np.random.randint(0, num_periods - 1)
 
+    print(dat[num_periods * (agent_to_check - 1) + period_to_check, 3])
     print(dat[num_periods * (agent_to_check - 1) + period_to_check, 8:11])
     print(dat[num_periods * (agent_to_check - 1) + period_to_check, 14:17])
-    print(dat[num_periods * (agent_to_check - 1) + period_to_check, 8:11])
+    print(dat[num_periods * (agent_to_check - 1) + period_to_check, 11:14])
     print(dat[num_periods*(agent_to_check-1)+period_to_check,2])
     assert dat[(agent_to_check-1)*num_periods+period_to_check,2] == 1
     # Todo:check for high common, check agent identifier, check period ident
