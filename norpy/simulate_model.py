@@ -58,17 +58,14 @@ from norpy.tests.auxiliary import HUGE_FLOAT
 
 def create_state_space(model_object):
     args = (model_object.num_periods, model_object.num_types, model_object.edu_spec_start,
-            model_object.edu_spec_max, model_spec.edu_spec_max + 1)
+            model_object.edu_spec_max, model_object.edu_spec_max + 1)
     states_all, states_number_period, mapping_state_idx, max_states_period = f2py_create_state_space(
         *args
     )
     states_all = states_all[:, : max(states_number_period), :]
-    state_space_info = [
-        states_all,
-        states_number_period,
-        mapping_state_idx,
-        max_states_period
-    ]
+    state_space_info = {"states_all":states_all,"states_number_period":states_number_period,
+                        "mapping_state_idx":mapping_state_idx,"max_states_period":max_states_period }
+
     return state_space_info
 
 
@@ -95,7 +92,7 @@ def return_simulated_shocks(model_object,simulation=False):
     if simulation == True:
         args = (np.zeros(3), model_object.shocks_cov, (model_object.num_periods, model_object.num_agents_sim))
     else:
-        args = (np.zeros(3), model_object.shocks_cov, (model_object.num_periods, model_object.num_agents_sim))
+        args = (np.zeros(3), model_object.shocks_cov, (model_object.num_periods, model_object.num_draws_emax))
 
     periods_draws_emax = np.random.multivariate_normal(*args)
     periods_draws_emax[:, :, :2] = np.clip(np.exp(periods_draws_emax[:, :, :2]), 0.0, HUGE_FLOAT)
@@ -158,15 +155,15 @@ def simulate(model_object):
     periods_emax = backward_induction_procedure(model_object,state_space_info,periods_rewards_systematic, periods_draws_emax)
 
     sample_lagged_start = np.random.choice([3, 3], p=[0.1, 0.9], size=model_object.num_agents_sim)
-    sample_edu_start = np.random.choice(edu_spec_start, size=model_object.num_agents_sim)
-    sample_types = np.random.choice(range(num_types), size=model_object.num_agents_sim)
+    sample_edu_start = np.random.choice(model_object.edu_spec_start, size=model_object.num_agents_sim)
+    sample_types = np.random.choice(range(model_object.num_types), size=model_object.num_agents_sim)
 
     args = [state_space_info["states_all"], state_space_info["mapping_state_idx"],
             periods_rewards_systematic, periods_emax,
             model_object.num_periods, model_object.num_agents_sim,
             periods_draws_sims, model_object.edu_spec_max,
             model_object.coeffs_common,
-            model_object.coeffs_work, delta,
+            model_object.coeffs_work, model_object.delta,
             sample_edu_start, sample_types, sample_lagged_start]
 
     dat = f2py_simulate(*args)

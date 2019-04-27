@@ -34,7 +34,7 @@ class ModelSpec(typing.NamedTuple):
 
     num_periods: int
     num_types: int
-    draws_emax: int
+    num_draws_emax: int
     num_edu_start: int
     edu_spec_start: np.ndarray
     edu_spec_max: int
@@ -78,7 +78,7 @@ class ModelSpec(typing.NamedTuple):
             if field in [
                 "num_periods",
                 "num_types",
-                "draws_emax",
+                "num_draws_emax",
                 "num_edu_start",
                 "edu_spec_max",
                 "num_agents_sim",
@@ -169,7 +169,7 @@ def get_random_model_specification(constr=None):
             "edu_spec_max",
             "edu_spec_start",
             "num_edu_start",
-            "draws_emax",
+            "num_draws_emax",
             "delta",
             "coeffs_common",
             "coeffs_home",
@@ -179,7 +179,7 @@ def get_random_model_specification(constr=None):
             "shocks_cov",
         ]
         for x in list_of_var:
-            if x in list(constr.keys):
+            if x in list(constr.keys()):
                 init_dict[x] = constr[x]
 
     init_dict = dict()
@@ -188,18 +188,18 @@ def get_random_model_specification(constr=None):
     init_dict["num_edu_start"] = np.random.randint(1, 4)
     init_dict["edu_spec_max"] = np.random.randint(10, 15)
     init_dict["edu_spec_start"] = np.random.choice(
-        range(1, 10), size=num_edu_start, replace=False
+        range(1, 10), size=init_dict["num_edu_start"], replace=False
     )
     init_dict["num_agents_sim"] = np.random.randint(1, 50)
 
-    init_dict["draws_emax"] = np.random.randint(1, 50)
+    init_dict["num_draws_emax"] = np.random.randint(1, 50)
     init_dict["delta"] = np.random.uniform(0.01, 0.99)
     init_dict["coeffs_common"] = np.random.uniform(size=2)
     init_dict["coeffs_home"] = np.random.uniform(size=3)
     init_dict["coeffs_edu"] = np.random.uniform(size=7)
     init_dict["coeffs_work"] = np.random.uniform(size=13)
-    init_dict["type_spec_shifts"] = np.random.normal(size=num_types * 3).reshape(
-        (num_types, 3)
+    init_dict["type_spec_shifts"] = np.random.normal(size=init_dict["num_types"] * 3).reshape(
+        (init_dict["num_types"], 3)
     )
     init_dict["shocks_cov"] = invwishart.rvs(df=3, scale=np.identity(3))
 
