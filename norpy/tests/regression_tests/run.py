@@ -10,6 +10,7 @@ import numpy as np
 
 from norpy.simulate_model import simulate
 from norpy.model_spec import get_random_model_specification, get_model_obj
+from norpy.norpy_config import TEST_RESOURCES_DIR
 
 
 def process_arguments(parser):
