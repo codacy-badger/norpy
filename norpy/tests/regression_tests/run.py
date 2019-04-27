@@ -5,6 +5,8 @@
 
 '''
 import os
+import argparse
+import pickle
 
 import numpy as np
 
@@ -37,7 +39,7 @@ def create_vault(num_test=100, seed=123456):
     """This function creates our regression vault."""
     np.random.seed(seed)
     seeds = np.random.randint(0, 1000, size=num_test)
-    file_dir = os.path.join(os.getcwd(),'ressources/regression_vault.norpy.json')
+    file_dir = os.path.join(TEST_RESOURCES_DIR, "regression_vault.pickle")
     tests = []
 
     for counter, seed in enumerate(seeds):
@@ -58,15 +60,15 @@ def create_vault(num_test=100, seed=123456):
 
 
 
-    json.dump(tests, open(file_dir, "w"))
+    pickle.dump(tests, open(file_dir, str("wb")))
 
 
 def check_vault():
     """This function runs another simulation for each init file in our regression vault.
     """
-    file_dir = os.path.join(TEST_RESOURCES_DIR, "regression_vault.soepy.json")
+    file_dir = os.path.join(TEST_RESOURCES_DIR, "regression_vault.pickle")
 
-    tests = json.load(open(file_dir, "r"))
+    tests = pickle.load(open(file_dir, "rb"))
     for test in tests:
 
         stat, init_dict = test
@@ -114,7 +116,8 @@ if __name__ == "__main__":
 
     elif request == "create":
 
-create_vault(num_test, seed)
+        create_vault(num_test, seed)
+
 
 
 
