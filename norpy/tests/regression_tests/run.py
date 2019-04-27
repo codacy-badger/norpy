@@ -71,8 +71,9 @@ def check_vault():
     tests = pickle.load(open(file_dir, "rb"))
     for test in tests:
 
-        stat, init_dict = test
 
+        stat, init_dict = test
+        print(init_dict)
         df = simulate(get_model_obj(init_dict))
 
         stat_new = np.sum(df.sum())

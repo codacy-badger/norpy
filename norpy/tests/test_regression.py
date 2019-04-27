@@ -13,7 +13,7 @@ def test1():
     """
 
     fname = TEST_RESOURCES_DIR / "regression_vault.pickle"
-    tests = pickle.load(open(fname))
+    tests = pickle.load(open(fname,"rb"))
     random_choice = np.random.choice(range(len(tests)), 5)
     tests = [tests[i] for i in random_choice]
 

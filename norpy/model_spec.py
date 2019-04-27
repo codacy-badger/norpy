@@ -8,6 +8,11 @@ from scipy.stats import invwishart
 # The typing module requires the use of
 # Python 3.6 or higher.
 import typing
+from norpy.tests.auxiliary import DATA_FORMATS_SIM
+from norpy.tests.auxiliary import DATA_LABELS_SIM
+from norpy.tests.auxiliary import MISSING_FLOAT
+from norpy.tests.auxiliary import MISSING_INT
+from norpy.tests.auxiliary import HUGE_FLOAT
 
 # Question how would I proceed with the intermediate model objects?
 
@@ -46,6 +51,8 @@ class ModelSpec(typing.NamedTuple):
     coeffs_edu: np.ndarray
     num_agents_sim: int
     delta: float
+    periods_draws_emax: np.ndarray
+    periods_draws_sims: np.ndarray
 
     # We make some of the private methods of the base class
     # public.
@@ -95,6 +102,8 @@ class ModelSpec(typing.NamedTuple):
                 "type_spec_shifts",
                 "edu_spec_start",
                 "shocks_cov",
+                "periods_draws_emax",
+                "periods_draws_sims"
             ]:
                 assert isinstance(attr, np.ndarray)
             else:
@@ -177,6 +186,9 @@ def get_random_model_specification(constr=None):
             "coeffs_work",
             "type_spec_shifts",
             "shocks_cov",
+            "periods_draws_emax",
+            "periods_draws_sims"
+
         ]
         for x in list_of_var:
             if x in list(constr.keys()):
@@ -202,6 +214,16 @@ def get_random_model_specification(constr=None):
         (init_dict["num_types"], 3)
     )
     init_dict["shocks_cov"] = invwishart.rvs(df=3, scale=np.identity(3))
+    args = (np.zeros(3), init_dict["shocks_cov"], (init_dict["num_periods"], init_dict["num_draws_emax"]))
+
+    init_dict["periods_draws_emax"] = np.random.multivariate_normal(*args)
+    init_dict["periods_draws_emax"][:, :, :2] = np.clip(np.exp(init_dict["periods_draws_emax"][:, :, :2]), 0.0, HUGE_FLOAT)
+
+    args = (np.zeros(3), init_dict["shocks_cov"], (init_dict["num_periods"], init_dict["num_agents_sim"]))
+
+    init_dict["periods_draws_sims"] = np.random.multivariate_normal(*args)
+    init_dict["periods_draws_sims"][:, :, :2] = np.clip(np.exp(init_dict["periods_draws_sims"][:, :, :2]), 0.0,
+                                                        HUGE_FLOAT)
 
     process_constraints(constr)
 
