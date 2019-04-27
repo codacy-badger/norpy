@@ -9,7 +9,7 @@ from scipy.stats import invwishart
 # Python 3.6 or higher.
 import typing
 
-#Question how would I proceed with the intermediate model objects?
+# Question how would I proceed with the intermediate model objects?
 
 
 class ModelSpec(typing.NamedTuple):
@@ -25,16 +25,19 @@ class ModelSpec(typing.NamedTuple):
         rho: a float indicating the degree of serial correlation
         periods: an integer for the length of the time horizon
     """
+
     # We need to define all fields and their type right at the
     # beginning. These cannot be changed after initialization
     # and no other fields added dynamically without raising
     # an error.
-    #I keep the variable names in the format we used so far in the runner.py files !
+    # I keep the variable names in the format we used so far in the runner.py files !
 
     num_periods: int
     num_types: int
     draws_emax: int
     num_edu_start: int
+    edu_spec_start: np.ndarray
+    edu_spec_max: int
     shocks_cov: np.ndarray
     type_spec_shifts: np.ndarray
     coeffs_common: np.ndarray
@@ -43,7 +46,6 @@ class ModelSpec(typing.NamedTuple):
     coeffs_edu: np.ndarray
     num_agents_sim: int
     delta: float
-
 
     # We make some of the private methods of the base class
     # public.
@@ -59,8 +61,8 @@ class ModelSpec(typing.NamedTuple):
 
     # We specify some methods that have no counterpart in the
     # base class.
-    def to_yaml(self, fname='test.yml'):
-        with open(fname, 'w') as out_file:
+    def to_yaml(self, fname="test.yml"):
+        with open(fname, "w") as out_file:
             yaml.dump(self._asdict(), out_file)
 
     def validate(self):
@@ -73,15 +75,30 @@ class ModelSpec(typing.NamedTuple):
         """
         for field in self._fields:
             attr = getattr(self, field)
-            if field in ['num_periods','num_types','draws_emax','num_edu_start','num_agents_sim']:
+            if field in [
+                "num_periods",
+                "num_types",
+                "draws_emax",
+                "num_edu_start",
+                "edu_spec_max",
+                "num_agents_sim",
+            ]:
                 assert isinstance(attr, int)
                 assert attr > 0
-            elif field == 'delta':
+            elif field == "delta":
                 assert isinstance(attr, float)
-            elif field in ['coeffs_common','coeffs_work','coeffs_home','coeffs_edu','type_spec_shifts','shocks_cov']:
+            elif field in [
+                "coeffs_common",
+                "coeffs_work",
+                "coeffs_home",
+                "coeffs_edu",
+                "type_spec_shifts",
+                "edu_spec_start",
+                "shocks_cov",
+            ]:
                 assert isinstance(attr, np.ndarray)
             else:
-                raise NotImplementedError('validation of {:} missing'.format(field))
+                raise NotImplementedError("validation of {:} missing".format(field))
 
     # We ovewrite some of the intrinsic __dunder__ methods to increase
     # usability of our class.
@@ -89,9 +106,9 @@ class ModelSpec(typing.NamedTuple):
         """Provides a string representation of the model speficiation for
         quick visual inspection.
         """
-        str_ = ''
+        str_ = ""
         for field in self._fields:
-            str_ += '{:}: {:}\n'.format(field, getattr(self, field))
+            str_ += "{:}: {:}\n".format(field, getattr(self, field))
         return str_
 
     def __eq__(self, other):
@@ -116,14 +133,6 @@ class ModelSpec(typing.NamedTuple):
     def __ne__(self, other):
         """Check the inequality of two model specification."""
         return not self.__eq__(other)
-
-
-
-
-
-
-
-
 
 
 def get_random_model_specification(constr=None):
@@ -153,29 +162,46 @@ def get_random_model_specification(constr=None):
         if constr is None:
             constr = dict()
 
-        list_of_var =['num_types','num_periods','num_agents_sim','num_edu_start',
-                    'draws_emax','delta','coeffs_common','coeffs_home','coeffs_edu',
-                    'coeffs_work','type_spec_shifts','shocks_cov']
+        list_of_var = [
+            "num_types",
+            "num_periods",
+            "num_agents_sim",
+            "edu_spec_max",
+            "edu_spec_start",
+            "num_edu_start",
+            "draws_emax",
+            "delta",
+            "coeffs_common",
+            "coeffs_home",
+            "coeffs_edu",
+            "coeffs_work",
+            "type_spec_shifts",
+            "shocks_cov",
+        ]
         for x in list_of_var:
             if x in list(constr.keys):
                 init_dict[x] = constr[x]
 
-
-
     init_dict = dict()
-    init_dict['num_types'] = np.random.randint(1, 10)
-    init_dict['num_periods'] = np.random.randint(1, 50)
-    init_dict['num_agents_sim'] = np.random.randint(1, 50)
-    init_dict['num_edu_start'] = np.random.randint(1, 4)
-    init_dict['draws_emax'] = np.random.randint(1,50)
-    init_dict['delta'] = np.random.uniform(0.01, 0.99)
-    init_dict['coeffs_common'] = np.random.uniform(size=2)
-    init_dict['coeffs_home'] = np.random.uniform(size=3)
-    init_dict['coeffs_edu'] = np.random.uniform(size=7)
-    init_dict['coeffs_work'] = np.random.uniform(size=13)
-    init_dict['type_spec_shifts'] = np.random.normal(size=num_types*3).reshape((num_types, 3))
-    init_dict['shocks_cov'] = invwishart.rvs(df=3, scale=np.identity(3))
+    init_dict["num_types"] = np.random.randint(1, 10)
+    init_dict["num_periods"] = np.random.randint(1, 50)
+    init_dict["num_edu_start"] = np.random.randint(1, 4)
+    init_dict["edu_spec_max"] = np.random.randint(10, 15)
+    init_dict["edu_spec_start"] = np.random.choice(
+        range(1, 10), size=num_edu_start, replace=False
+    )
+    init_dict["num_agents_sim"] = np.random.randint(1, 50)
 
+    init_dict["draws_emax"] = np.random.randint(1, 50)
+    init_dict["delta"] = np.random.uniform(0.01, 0.99)
+    init_dict["coeffs_common"] = np.random.uniform(size=2)
+    init_dict["coeffs_home"] = np.random.uniform(size=3)
+    init_dict["coeffs_edu"] = np.random.uniform(size=7)
+    init_dict["coeffs_work"] = np.random.uniform(size=13)
+    init_dict["type_spec_shifts"] = np.random.normal(size=num_types * 3).reshape(
+        (num_types, 3)
+    )
+    init_dict["shocks_cov"] = invwishart.rvs(df=3, scale=np.identity(3))
 
     process_constraints(constr)
 
@@ -205,7 +231,7 @@ def get_model_obj(source=None, constr=None):
     if isinstance(source, dict):
         model_spec = ModelSpec(**source)
     elif isinstance(source, pathlib.PosixPath):
-        model_spec = ModelSpec(**yaml.load(open(source, 'r'), Loader=yaml.FullLoader))
+        model_spec = ModelSpec(**yaml.load(open(source, "r"), Loader=yaml.FullLoader))
     elif source is None:
         model_spec = ModelSpec(**get_random_model_specification(constr))
     else:
