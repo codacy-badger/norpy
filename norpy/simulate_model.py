@@ -56,9 +56,9 @@ from norpy.tests.auxiliary import HUGE_FLOAT
 
 
 
-def create_state_space(model_object):
+def create_state_space(model_object,boolean=False):
     args = (model_object.num_periods, model_object.num_types, model_object.edu_spec_start,
-            model_object.edu_spec_max, model_object.edu_spec_max + 1)
+            model_object.edu_spec_max, model_object.edu_spec_max + 1,boolean)
     states_all, states_number_period, mapping_state_idx, max_states_period = f2py_create_state_space(
         *args
     )

@@ -57,6 +57,7 @@ class ModelSpec(typing.NamedTuple):
     sample_edu_start : np.ndarray
     sample_types: np.ndarray
 
+
     # We make some of the private methods of the base class
     # public.
     def as_dict(self):
