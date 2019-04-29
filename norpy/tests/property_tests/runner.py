@@ -35,29 +35,28 @@ FLAGS_DEBUG += ['-fbacktrace', '-g', '-fmax-errors=1', '-ffree-line-length-0']
 FLAGS_DEBUG += ['-cpp', '-Wcharacter-truncation', '-Wimplicit-interface']
 
 
-if True:
 
-    cmd = "git clean -df"
-    os.system(cmd)
+cmd = "git clean -df"
+os.system(cmd)
 
-    # We need to process in two steps. First we compile a library and then use it in a special
-    # F2PY interface for Python.
-    os.chdir("norpy/src")
+# We need to process in two steps. First we compile a library and then use it in a special
+# F2PY interface for Python.
+os.chdir("norpy/solve")
 
-    cmd = "gfortran -c -fPIC lib_norpy.f90"
-    os.system(cmd)
+cmd = "gfortran -c -fPIC lib_norpy.f90"
+os.system(cmd)
 
-    cmd = "ar crs libnorpy.a lib_norpy.o"
-    os.system(cmd)
+cmd = "ar crs libnorpy.a lib_norpy.o"
+os.system(cmd)
 
-    args = ""
-    args += "--f90exec=gfortran --f90flags=" + '"' + " ".join(FLAGS_DEBUG) + '" '
-    args += "-L. -lnorpy -llapack"
+args = ""
+args += "--f90exec=gfortran --f90flags=" + '"' + " ".join(FLAGS_DEBUG) + '" '
+args += "-L. -lnorpy -llapack"
 
-    src = open("norpy_hatchery.f90", "rb").read()
-    f2py.compile(src, "norpy_hatchery", args, extension=".f90")
+src = open("norpy_hatchery.f90", "rb").read()
+f2py.compile(src, "norpy_hatchery", args, extension=".f90")
 
-    os.chdir('../../')
+os.chdir('../../')
 
 
 from norpy.solve.norpy_hatchery import f2py_calculate_immediate_rewards

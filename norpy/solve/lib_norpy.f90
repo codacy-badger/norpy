@@ -17,7 +17,7 @@ MODULE lib_norpy
     INTEGER(our_int), PARAMETER :: two_int = 2_our_int
 
     REAL(our_dble), PARAMETER :: INADMISSIBILITY_PENALTY = -400000.00_our_dble
-					    REAL(our_dble), PARAMETER :: one_hundred_dble = 100.00_our_dble
+    REAL(our_dble), PARAMETER :: one_hundred_dble = 100.00_our_dble
     REAL(our_dble), PARAMETER :: MISSING_FLOAT = -99.0_our_dble
     REAL(our_dble), PARAMETER :: HUGE_FLOAT = 1.0e20_our_dble
     REAL(our_dble), PARAMETER :: three_dble = 3.00_our_dble
@@ -31,26 +31,20 @@ MODULE lib_norpy
         INTEGER(our_int) :: is_return_not_high_school
         INTEGER(our_int) :: is_return_high_school
         INTEGER(our_int) :: not_explagged
-        
         INTEGER(our_int) :: is_young_adult
         INTEGER(our_int) :: choice_lagged
         INTEGER(our_int) :: work_lagged
-        
         INTEGER(our_int) :: not_any_exp
-        
         INTEGER(our_int) :: hs_graduate
         INTEGER(our_int) :: co_graduate
         INTEGER(our_int) :: edu_lagged
         INTEGER(our_int) :: any_exp
-
         INTEGER(our_int) :: is_minor
         INTEGER(our_int) :: is_adult
         INTEGER(our_int) :: period
         INTEGER(our_int) :: exp
-
         INTEGER(our_int) :: type
         INTEGER(our_int) :: edu
-
         INTEGER(our_int) :: is_mandatory
 
     END TYPE
@@ -59,12 +53,10 @@ MODULE lib_norpy
 
         REAL(our_dble), ALLOCATABLE :: typeshifts(:, :)
         REAL(our_dble), ALLOCATABLE :: typeshares(:)
-
         REAL(our_dble) :: coeffs_common(2)
         REAL(our_dble) :: coeffs_home(3)
         REAL(our_dble) :: coeffs_edu(7)
         REAL(our_dble) :: coeffs_work(13)
-
         REAL(our_dble) :: delta(1)
 
     END TYPE
@@ -86,12 +78,10 @@ CONTAINS
     FUNCTION calculate_wages_systematic(covariates,coeffs_work, typeshifts) RESULT(wages)
 
         !/* dummy arguments        */
-	REAL(our_dble) :: wages
-
-	REAL(our_dble), INTENT(IN) :: typeshifts(:, :)
+	REAL(our_dble) :: wages 
+        REAL(our_dble), INTENT(IN) :: typeshifts(:, :)
         REAL(our_dble), INTENT(IN) :: coeffs_work(13)
         
-
         TYPE(COVARIATES_DICT), INTENT(IN) :: covariates
 
         !/* local variables        */
@@ -113,13 +103,11 @@ CONTAINS
         covars_wages(6) = covariates%co_graduate
         covars_wages(7) = covariates%period - one_dble
         covars_wages(8) = covariates%is_minor
-
         covars_wages(9:) = (/ covariates%any_exp, covariates%work_lagged/)
-        wages = EXP(DOT_PRODUCT(covars_wages, coeffs_work(:10)))
-
-	wages = wages * EXP(typeshifts(covariates%type + 1,1))
         
-
+        wages = EXP(DOT_PRODUCT(covars_wages, coeffs_work(:10)))
+        wages = wages * EXP(typeshifts(covariates%type + 1,1))
+        
     END FUNCTION
     !***********************************************************************************************
     !***********************************************************************************************
@@ -252,13 +240,13 @@ CONTAINS
     END FUNCTION
     !***********************************************************************************************
     !***********************************************************************************************
-    SUBROUTINE construct_emax_risk(emax, period, k, draws_emax_risk, rewards_systematic, &
+    FUNCTION construct_emax_risk(period, k, draws_emax_risk, rewards_systematic, &
             periods_emax, states_all, mapping_state_idx, edu_spec, optim_paras, &
-            num_draws_emax, num_periods)
+            num_draws_emax, num_periods) RESULT(emax)
 
         !/* external objects    */
-
-        REAL(our_dble), INTENT(OUT) :: emax
+        
+        REAL(our_dble) :: emax
 
         TYPE(OPTIMPARAS_DICT), INTENT(IN) :: optim_paras
         TYPE(EDU_DICT), INTENT(IN) :: edu_spec
@@ -311,7 +299,7 @@ CONTAINS
         ! Scaling
         emax = emax / num_draws_emax
 
-    END SUBROUTINE
+    END FUNCTION
     !***********************************************************************************************
     !***********************************************************************************************
     FUNCTION back_out_systematic_wages(rewards_systematic, exp, edu, choice_lagged, &
@@ -337,29 +325,20 @@ CONTAINS
         INTEGER(our_int) :: covars_general(3)
         INTEGER(our_int) :: covars_common(2)
         INTEGER(our_int) :: i
-
         REAL(our_dble) :: rewards_common
         REAL(our_dble) :: general
-
         !-------------------------------------------------------------------------------
         ! Algorithm
         !-------------------------------------------------------------------------------
-
+        
         covariates = construct_covariates(exp, edu, choice_lagged, MISSING_INT, MISSING_INT)
-
-        covars_general = (/ one_int, covariates%not_explagged, covariates%not_any_exp /)
+	covars_general = (/ one_int, covariates%not_explagged, covariates%not_any_exp /)
         general = DOT_PRODUCT(covars_general, optim_paras%coeffs_work(11:13))
-
-
-
+        
         ! Second we do the same with the common component.
         covars_common = (/ covariates%hs_graduate, covariates%co_graduate /)
         rewards_common = DOT_PRODUCT(covars_common,optim_paras%coeffs_common)
-	
-
-        
-        wages_systematic = rewards_systematic(1) - general - rewards_common
-        
+	wages_systematic = rewards_systematic(1) - general - rewards_common
 
     END FUNCTION
     !***********************************************************************************************
@@ -389,14 +368,12 @@ CONTAINS
         !/* internal objects        */
 
         REAL(our_dble) :: wages_systematic
-	
-        REAL(our_dble) :: total_increment
+	REAL(our_dble) :: total_increment
         REAL(our_dble) :: emaxs(3)
 
         INTEGER(our_int) :: choice_lagged
         INTEGER(our_int) :: exp
-	        
-        INTEGER(our_int) :: edu
+	INTEGER(our_int) :: edu
         INTEGER(our_int) :: i
         
         !------------------------------------------------------------------------------
@@ -407,34 +384,27 @@ CONTAINS
         exp = states_all(period + 1, k + 1, 1)
 	edu = states_all(period + 1, k + 1, 2)
         choice_lagged = states_all(period + 1, k + 1, 3)
-        
         wages_systematic = back_out_systematic_wages(rewards_systematic, exp, edu, choice_lagged, optim_paras)
         
         ! Initialize containers
         rewards_ex_post = zero_dble
 
         ! Calculate ex post rewards
-         
          total_increment = rewards_systematic(1) - wages_systematic
          rewards_ex_post(1) = wages_systematic * draws(1) + total_increment
          
-        
         Do i = 2, 3
             rewards_ex_post(i) = rewards_systematic(i) + draws(i)
         END DO
         
-
-        ! Get future values
+	! Get future values
         
         IF (period .NE. (num_periods - one_int)) THEN
-            
-            CALL get_emaxs(emaxs, mapping_state_idx, period, periods_emax, k, states_all, edu_spec)
-            
+            emaxs = get_emaxs( mapping_state_idx, period, periods_emax, k, states_all, edu_spec)
         ELSE
             emaxs = zero_dble
         END IF
         
-
         ! Calculate total utilities
         total_values = rewards_ex_post + optim_paras%delta(1) * emaxs
 
@@ -446,61 +416,54 @@ CONTAINS
     END SUBROUTINE
     !***********************************************************************************************
     !***********************************************************************************************
-SUBROUTINE get_emaxs(emaxs, mapping_state_idx, period, periods_emax, k, states_all, edu_spec)
+    FUNCTION get_emaxs(mapping_state_idx, period, periods_emax, k, states_all, edu_spec) RESULT(emaxs)
 
-        !/* external objects        */
+	!/* external objects        */
 
-        TYPE(EDU_DICT), INTENT(IN) :: edu_spec
+	TYPE(EDU_DICT), INTENT(IN) :: edu_spec
 
-        REAL(our_dble), INTENT(OUT) :: emaxs(3)
+	REAL(our_dble) :: emaxs(3)
 
-        INTEGER(our_int), INTENT(IN) :: mapping_state_idx(:, :, :, :, :)
-        INTEGER(our_int), INTENT(IN) :: states_all(:, :, :)
-        INTEGER(our_int), INTENT(IN) :: period
-        INTEGER(our_int), INTENT(IN) :: k
+	INTEGER(our_int), INTENT(IN) :: mapping_state_idx(:, :, :, :, :)
+	INTEGER(our_int), INTENT(IN) :: states_all(:, :, :)
+	INTEGER(our_int), INTENT(IN) :: period
+	INTEGER(our_int), INTENT(IN) :: k
 
-        REAL(our_dble), INTENT(IN) :: periods_emax(:, :)
+	REAL(our_dble), INTENT(IN) :: periods_emax(:, :)
 
-        !/* internals objects       */
+	!/* internals objects       */
 
-        INTEGER(our_int) :: future_idx
-        INTEGER(our_int) :: exp
+	INTEGER(our_int) :: future_idx
+	INTEGER(our_int) :: exp
+	INTEGER(our_int) :: type
+	INTEGER(our_int) :: edu
 
-        INTEGER(our_int) :: type
-        INTEGER(our_int) :: edu
+	!------------------------------------------------------------------------------
+	! Algorithm
+	!------------------------------------------------------------------------------
 
-        !------------------------------------------------------------------------------
-        ! Algorithm
-        !------------------------------------------------------------------------------
-        
-        ! Distribute state space
-        exp = states_all(period + 1, k + 1, 1)
-        edu = states_all(period + 1, k + 1, 2)
-        type = states_all(period + 1, k + 1, 4)
-        
-       
-        ! Working in Occupation A
-        future_idx = mapping_state_idx(period + 1 + 1, exp + 1 + 1, edu + 1, 1, type)
-        emaxs(1) = periods_emax(period + 1 + 1, future_idx + 1)
-        
+	! Distribute state space
+	exp = states_all(period + 1, k + 1, 1)
+	edu = states_all(period + 1, k + 1, 2)
+	type = states_all(period + 1, k + 1, 4)
 
+	! Working in Occupation A
+	future_idx = mapping_state_idx(period + 1 + 1, exp + 1 + 1, edu + 1, 1, type)
+	emaxs(1) = periods_emax(period + 1 + 1, future_idx + 1)
 
+	! Increasing schooling. Note that adding an additional year of schooling is only possible for those that have strictly less than the maximum level of additional education allowed.
+	IF(edu .GE. edu_spec%max) THEN
+	    emaxs(2) = zero_dble
+	ELSE
+	    future_idx = mapping_state_idx(period + 1 + 1, exp + 1, edu + 1 + 1, 2, type)
+	    emaxs(2) = periods_emax(period + 1 + 1, future_idx + 1)
+	END IF
 
-        ! Increasing schooling. Note that adding an additional year of schooling is only possible for those that have strictly less than the maximum level of additional education allowed.
-        
-        IF(edu .GE. edu_spec%max) THEN
-            emaxs(2) = zero_dble
-        ELSE
-            future_idx = mapping_state_idx(period + 1 + 1, exp + 1, edu + 1 + 1, 2, type)
-            emaxs(2) = periods_emax(period + 1 + 1, future_idx + 1)
-        END IF
-        
+	! Staying at home
+	future_idx = mapping_state_idx(period + 1 + 1, exp + 1, edu + 1, 3, type)
+	emaxs(3) = periods_emax(period + 1 + 1, future_idx + 1)
 
-        ! Staying at home
-        future_idx = mapping_state_idx(period + 1 + 1, exp + 1, edu + 1, 3, type)
-        emaxs(3) = periods_emax(period + 1 + 1, future_idx + 1)
-
-    END SUBROUTINE
+    END FUNCTION
 !***************************************************************************************************
 !***************************************************************************************************
 

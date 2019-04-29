@@ -13,7 +13,6 @@ SUBROUTINE f2py_create_state_space(states_all, states_number_period, mapping_sta
     INTEGER, INTENT(OUT) :: states_number_period(num_periods)
     INTEGER, INTENT(OUT) :: max_states_period
 
-
     INTEGER, INTENT(IN) :: edu_spec_start(:)
     INTEGER, INTENT(IN) :: edu_spec_max
     INTEGER, INTENT(IN) :: min_idx_int
@@ -22,6 +21,7 @@ SUBROUTINE f2py_create_state_space(states_all, states_number_period, mapping_sta
     LOGICAL, INTENT(IN),OPTIONAL :: test_indication_optional
 
     !/* local variables        */
+
     LOGICAL :: test_indication
     INTEGER :: choice_lagged
     INTEGER :: num_edu_start
@@ -30,7 +30,6 @@ SUBROUTINE f2py_create_state_space(states_all, states_number_period, mapping_sta
     INTEGER :: period
     INTEGER :: type
     INTEGER :: exp 
-
     INTEGER :: k
     INTEGER :: j
 
@@ -45,7 +44,6 @@ SUBROUTINE f2py_create_state_space(states_all, states_number_period, mapping_sta
         test_indication = .FALSE.
     END IF
 		
-
     ! Construct auxiliary objects
     num_edu_start = SIZE(edu_spec_start)
 
@@ -65,38 +63,29 @@ SUBROUTINE f2py_create_state_space(states_all, states_number_period, mapping_sta
 
             ! Loop over all initial level of schooling
             DO j = 1, num_edu_start
-
                 edu_start = edu_spec_start(j)
 
                 ! Loop over all admissible work experiences for Occupation A
                 DO exp = 0, num_periods
 
-                    
-
                         ! Loop over all admissible additional education levels
                         DO edu_add = 0, num_periods
-
-
                             IF (edu_add + exp  .GT. period - 1) CYCLE
 
                             ! Agent cannot attain more additional education than (EDU_MAX - EDU_START).
                             IF (edu_add .GT. (edu_spec_max - edu_start)) CYCLE
-
                             DO choice_lagged = 1,3
-
                                 IF (period .GT. one_int) THEN
 
                                     ! (0, 1) Whenever an agent has only worked in Occupation A, then choice_lagged cannot be anything other than one.
                                     IF ((choice_lagged .NE. one_int) .AND. (exp .EQ. period-1)) CYCLE
                                     
-
-                                   
-
                                     ! (0, 3) Whenever an agent has only acquired additional education, then choice_lagged cannot be  anything other than two.
                                     IF ((choice_lagged .NE. two_int) .AND. (edu_add .EQ. period - 1)) CYCLE
 
                                     ! (0, 4) Whenever an agent has not acquired any additional education and we are not in the first period, then lagged education cannot take a value of three.
                                     IF ((choice_lagged .EQ. two_int) .AND. (edu_add .EQ. zero_int)) CYCLE
+
                                     !Whenever an agent has only worked or has only stayed in school he cannot have home as lagged choice
                                     IF ((choice_lagged .EQ. three_int) .AND. (edu_add + exp  .EQ. period - 1)) CYCLE
 
@@ -104,22 +93,19 @@ SUBROUTINE f2py_create_state_space(states_all, states_number_period, mapping_sta
 
                                 ! (1, 1) In the first period individual either were in school the previous period as well or at home. The cannot have any work experience.
                                 IF (period .EQ. one_int) THEN
-
                                     IF (choice_lagged .EQ. one_int)  CYCLE
 
                                 END IF
+                                
                                 ! (2, 1) An individual that has never worked in Occupation A cannot have a that lagged activity.
                                 IF ((choice_lagged .EQ. one_int) .AND. (exp .EQ. zero_int)) CYCLE
 
                                 ! (3, 1) An individual that has never worked in Occupation B cannot have a that lagged activity.
                                      
-                                
-
-				
                                 IF (test_indication .EQV. .FALSE.) THEN
-
-                                	IF (mapping_state_idx(period, exp + 1 ,edu_start + edu_add + 1 , choice_lagged, type)&
+                                    IF (mapping_state_idx(period, exp + 1 ,edu_start + edu_add + 1 , choice_lagged, type)&
 					&.NE. MISSING_INT) CYCLE
+                                
                                 END IF
 
                                 ! ! Collect mapping of state space to array index.
@@ -140,8 +126,6 @@ SUBROUTINE f2py_create_state_space(states_all, states_number_period, mapping_sta
                 END DO
 
             END DO
-
-        
 
         ! Record maximum number of state space realizations by time period
         states_number_period(period) = k
@@ -166,13 +150,11 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
 
     DOUBLE PRECISION, INTENT(OUT) :: periods_rewards_systematic(num_periods, max_states_period, 3)
     
-
     DOUBLE PRECISION, INTENT(IN) :: typespec_shifts(:, :)
     DOUBLE PRECISION, INTENT(IN) :: coeffs_common(2)
     DOUBLE PRECISION, INTENT(IN) :: coeffs_home(3)
     DOUBLE PRECISION, INTENT(IN) :: coeffs_edu(7)
     DOUBLE PRECISION, INTENT(IN) :: coeffs_work(13)
-
 
     INTEGER, INTENT(IN) :: states_number_period(:)
     INTEGER, INTENT(IN) :: states_all(:, :, :)
@@ -182,13 +164,11 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
     !/* local variables        */
 
     INTEGER :: choice_lagged
-
     INTEGER :: covars_home(3)
     INTEGER :: covars_edu(7)
     INTEGER :: period
     INTEGER :: type
     INTEGER :: exp
-
     INTEGER :: edu
     INTEGER :: k
     INTEGER :: i
@@ -206,23 +186,16 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
 
     periods_rewards_systematic = MISSING_FLOAT
 		
-
-    
-  
-    
     ! Calculate systematic instantaneous rewards
     DO period = num_periods, 1, -1
-	
-        DO k=1, (states_number_period(period))
+	DO k=1, (states_number_period(period))
 	    	
-
             ! Distribute state space
             exp = states_all(period, k, 1)
             edu = states_all(period, k, 2)
             choice_lagged = states_all(period, k, 3)
             type = states_all(period, k, 4)
             
-
             ! Construct auxiliary information
             covariates = construct_covariates(exp, edu, choice_lagged, type, period)
 
@@ -233,12 +206,8 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
             ! Calculate the systematic part of OCCUPATION A and OCCUPATION B rewards. these are defined in a general sense, where not only wages matter.
             ! Only occupation a now will give a REAL instead of an ARRAY
             wages = calculate_wages_systematic(covariates, coeffs_work, typespec_shifts)
-
-            
             rewards(1) = wages + rewards_general
 	    	
-            
-
             ! Calculate systematic part of schooling utility
             covars_edu(1) = one_int
             covars_edu(2) = covariates%hs_graduate
@@ -247,12 +216,11 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
             covars_edu(5) = covariates%is_return_high_school
             covars_edu(6) = covariates%period - one_int
             covars_edu(7) = covariates%is_mandatory
-
+            
             rewards(2) = DOT_PRODUCT(covars_edu, coeffs_edu)
 
             ! Calculate systematic part of HOME
             covars_home(1) = one_int
-            
             covars_home(2) = covariates%is_young_adult
             covars_home(3) = covariates%is_adult
             
@@ -293,10 +261,8 @@ SUBROUTINE f2py_backward_induction(periods_emax, states_all, states_number_perio
 
     DOUBLE PRECISION, INTENT(IN) :: periods_rewards_systematic(:, :, :)
     DOUBLE PRECISION, INTENT(IN) :: periods_draws_emax(:, :, :)
-    
     DOUBLE PRECISION, INTENT(IN) :: coeffs_common(2)
     DOUBLE PRECISION, INTENT(IN) :: coeffs_work(13)
-    
     DOUBLE PRECISION, INTENT(IN) :: delta
     
     INTEGER, INTENT(IN) :: mapping_state_idx(:, :,  :, :, :)
@@ -327,33 +293,24 @@ SUBROUTINE f2py_backward_induction(periods_emax, states_all, states_number_perio
     optim_paras%coeffs_common = coeffs_common
     optim_paras%coeffs_work = coeffs_work
     optim_paras%delta = delta
-
+    
     edu_spec%max = edu_spec_max
 
     periods_emax = MISSING_FLOAT
 
     DO period = (num_periods - 1), 0, -1
-       
-	
         draws_emax_risk = periods_draws_emax(period + 1,:, :)
 
         DO k = 0, (states_number_period(period + 1) - 1)
-            
             rewards_systematic = periods_rewards_systematic(period + 1, k + 1, :)
-
-            CALL construct_emax_risk(emax, period, k, draws_emax_risk, rewards_systematic, &
+            emax = construct_emax_risk( period, k, draws_emax_risk, rewards_systematic, &
                     periods_emax, states_all, mapping_state_idx, edu_spec, optim_paras, &
                     num_draws_emax, num_periods)
-
-            
-	    
             periods_emax(period + 1, k + 1) = emax
 	    
-
         END DO
 
     END DO
-
 
 END SUBROUTINE
 !***************************************************************************************************
@@ -377,7 +334,6 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, &
     DOUBLE PRECISION, INTENT(IN) :: periods_emax(:, :)
     DOUBLE PRECISION, INTENT(IN) :: coeffs_common(2)
     DOUBLE PRECISION, INTENT(IN) :: coeffs_work(13)
-  
     DOUBLE PRECISION, INTENT(IN) :: delta
 
     INTEGER, INTENT(IN) :: sample_lagged_start(:)
@@ -385,7 +341,6 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, &
     INTEGER, INTENT(IN) :: sample_types(:)
     INTEGER, INTENT(IN) :: edu_spec_max
     INTEGER, INTENT(IN) :: num_periods
-
     INTEGER, INTENT(IN) :: mapping_state_idx(:, :,  :, :, :)
     INTEGER, INTENT(IN) :: states_all(:, :, :)
     INTEGER, INTENT(IN) :: num_agents_sim
@@ -393,9 +348,7 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, &
     !/* internal objects*/
 
     TYPE(OPTIMPARAS_DICT) :: optim_paras
-
     TYPE(EDU_DICT) :: edu_spec
-
     TYPE(COVARIATES_DICT) :: covariates
 
     REAL(our_dble) :: rewards_systematic(3)
@@ -409,7 +362,6 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, &
     INTEGER(our_int) :: choice
     INTEGER(our_int) :: period
     INTEGER(our_int) :: exp
-
     INTEGER(our_int) :: count
     INTEGER(our_int) :: type
     INTEGER(our_int) :: edu
@@ -423,11 +375,8 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, &
     ! Construct derived types
     optim_paras%coeffs_common = coeffs_common
     optim_paras%coeffs_work = coeffs_work
-
     optim_paras%delta = delta
-
     edu_spec%max = edu_spec_max
-
     data_sim = MISSING_FLOAT
 
     ! Iterate over agents and periods
@@ -439,7 +388,6 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, &
         current_state = states_all(1, 1, :)
 
         ! We need to modify the initial conditions.
-        
         current_state(2) = sample_edu_start(i + 1)
 	current_state(3) = sample_lagged_start(i + 1)
         current_state(4) = sample_types(i + 1)
@@ -448,7 +396,6 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, &
 
             ! Distribute state space
             exp = current_state(1)
-
             edu = current_state(2)
             choice_lagged = current_state(3)
             type = current_state(4) !Do we even need that expression???
@@ -475,7 +422,6 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, &
 
             ! Determine and record optimal choice
             choice = MAXLOC(total_values, DIM = one_int)
-
             data_sim(count + 1, 3) = DBLE(choice)
 
             ! Record wages
@@ -499,9 +445,7 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, &
             covariates = construct_covariates(exp, edu, choice_lagged, type, period)
             data_sim(count + 1, 19) = calculate_rewards_general(covariates, &
                     optim_paras%coeffs_work)
-
             data_sim(count + 1, 20) = calculate_rewards_common(covariates, optim_paras%coeffs_common)
-
             data_sim(count + 1, 21:23) = rewards_ex_post
 
             !# Update work experiences or education
