@@ -5,7 +5,7 @@ Parametize the test functions
 
 TODO: Is that one just the same as test_grid_rewards??
 Check if so then erase it !
-
+pytho
 """
 
 import os
@@ -15,6 +15,10 @@ import pytest
 from numpy import f2py
 import numpy as np
 import math
+
+from norpy.simulate_model import create_state_space, return_immediate_rewards
+from norpy.model_spec import get_random_model_specification, get_model_obj
+
 
 # If you need to compile the F2PY interface again.
 
@@ -31,7 +35,7 @@ if True:
 
     # We need to process in two steps. First we compile a library and then use it in a special
     # F2PY interface for Python.
-    os.chdir("norpy/src")
+    os.chdir("norpy/solve")
 
     cmd = "gfortran -c -fPIC lib_norpy.f90"
     os.system(cmd)
@@ -301,7 +305,7 @@ def test_immediate_rewards_home(input_output_immediate_rewards_home):
         input_output_immediate_rewards_home[0][
             input_output_immediate_rewards_home[1] - 1,
             input_output_immediate_rewards_home[3],
-            2,
+            2
         ]
         == input_output_immediate_rewards_home[2]
     )
@@ -376,7 +380,7 @@ def test_immediate_rewards_educ(input_output_immediate_rewards_educ):
                 input_output_immediate_rewards_educ[0][
                     input_output_immediate_rewards_educ[1] - 1,
                     input_output_immediate_rewards_educ[2],
-                    1,
+                    1
                 ]
             ]
         ),
@@ -463,7 +467,7 @@ def test_immediate_rewards_occupation(input_output_immediate_rewards_occupation)
                 input_output_immediate_rewards_occupation[0][
                     input_output_immediate_rewards_occupation[1] - 1,
                     input_output_immediate_rewards_occupation[2],
-                    0,
+                    0
                 ]
             ]
         ),

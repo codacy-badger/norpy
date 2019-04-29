@@ -28,7 +28,7 @@ if True:
 
     # We need to process in two steps. First we compile a library and then use it in a special
     # F2PY interface for Python.
-    os.chdir("norpy/src")
+    os.chdir("norpy/solve")
 
     cmd = "gfortran -c -fPIC lib_norpy.f90"
     os.system(cmd)

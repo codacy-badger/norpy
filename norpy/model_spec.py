@@ -151,6 +151,9 @@ class ModelSpec(typing.NamedTuple):
         return not self.__eq__(other)
 
 
+
+
+
 def get_random_model_specification(constr=None):
     """Create a random model specification
 
@@ -205,10 +208,10 @@ def get_random_model_specification(constr=None):
                 init_dict[x] = constr[x]
 
     init_dict = dict()
-    init_dict["num_types"] = np.random.randint(1, 10)
-    init_dict["num_periods"] = np.random.randint(1, 50)
+    init_dict["num_types"] = np.random.randint(1, 5)
+    init_dict["num_periods"] = np.random.randint(1, 10)
     init_dict["num_edu_start"] = np.random.randint(1, 4)
-    init_dict["edu_spec_max"] = np.random.randint(10, 15)
+    init_dict["edu_spec_max"] = np.random.randint(15, 25)
     init_dict["edu_spec_start"] = np.random.choice(
         range(1, 10), size=init_dict["num_edu_start"], replace=False
     )
