@@ -1,6 +1,6 @@
 """
 I clipped shocks to be less than 10 mio for testing purposes.
-There might be a m ore elgenat way to do this! 
+There might be a m ore elgenat way to do this!
 
 
 """

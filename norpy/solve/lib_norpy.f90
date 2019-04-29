@@ -30,7 +30,7 @@ MODULE lib_norpy
  
         INTEGER(our_int) :: is_return_not_high_school
         INTEGER(our_int) :: is_return_high_school
-        INTEGER(our_int) :: not_exp_lagged
+        INTEGER(our_int) :: not_explagged
         
         INTEGER(our_int) :: is_young_adult
         INTEGER(our_int) :: choice_lagged
@@ -46,7 +46,7 @@ MODULE lib_norpy
         INTEGER(our_int) :: is_minor
         INTEGER(our_int) :: is_adult
         INTEGER(our_int) :: period
-        INTEGER(our_int) :: exp_
+        INTEGER(our_int) :: exp
 
         INTEGER(our_int) :: type
         INTEGER(our_int) :: edu
@@ -57,8 +57,8 @@ MODULE lib_norpy
 
     TYPE OPTIMPARAS_DICT
 
-        REAL(our_dble), ALLOCATABLE :: type_shifts(:, :)
-        REAL(our_dble), ALLOCATABLE :: type_shares(:)
+        REAL(our_dble), ALLOCATABLE :: typeshifts(:, :)
+        REAL(our_dble), ALLOCATABLE :: typeshares(:)
 
         REAL(our_dble) :: coeffs_common(2)
         REAL(our_dble) :: coeffs_home(3)
@@ -83,12 +83,12 @@ CONTAINS
 
     !***********************************************************************************************
     !***********************************************************************************************
-    FUNCTION calculate_wages_systematic(covariates,coeffs_work, type_shifts) RESULT(wages)
+    FUNCTION calculate_wages_systematic(covariates,coeffs_work, typeshifts) RESULT(wages)
 
         !/* dummy arguments        */
 	REAL(our_dble) :: wages
 
-	REAL(our_dble), INTENT(IN) :: type_shifts(:, :)
+	REAL(our_dble), INTENT(IN) :: typeshifts(:, :)
         REAL(our_dble), INTENT(IN) :: coeffs_work(13)
         
 
@@ -107,8 +107,8 @@ CONTAINS
         ! Auxiliary objects
         covars_wages(1) = one_dble
         covars_wages(2) = covariates%edu
-        covars_wages(3) = covariates%exp_
-        covars_wages(4) = (covariates%exp_ ** 2) / one_hundred_dble
+        covars_wages(3) = covariates%exp
+        covars_wages(4) = (covariates%exp ** 2) / one_hundred_dble
 	covars_wages(5) = covariates%hs_graduate
         covars_wages(6) = covariates%co_graduate
         covars_wages(7) = covariates%period - one_dble
@@ -117,7 +117,7 @@ CONTAINS
         covars_wages(9:) = (/ covariates%any_exp, covariates%work_lagged/)
         wages = EXP(DOT_PRODUCT(covars_wages, coeffs_work(:10)))
 
-	wages = wages * EXP(type_shifts(covariates%type + 1,1))
+	wages = wages * EXP(typeshifts(covariates%type + 1,1))
         
 
     END FUNCTION
@@ -165,7 +165,7 @@ CONTAINS
         ! Algorithm
         !-------------------------------------------------------------------------------------------
 
-        covars_general = (/ one_int, covariates%not_exp_lagged, covariates%not_any_exp /)
+        covars_general = (/ one_int, covariates%not_explagged, covariates%not_any_exp /)
         rewards_general = DOT_PRODUCT(covars_general, coeffs_general)
 
         
@@ -196,7 +196,7 @@ CONTAINS
     END FUNCTION
     !***********************************************************************************************
     !***********************************************************************************************
-    FUNCTION construct_covariates(exp_, edu, choice_lagged, type_, period) RESULT(covariates)
+    FUNCTION construct_covariates(exp, edu, choice_lagged, type, period) RESULT(covariates)
 
         !/* dummy arguments    */
 
@@ -204,8 +204,8 @@ CONTAINS
 
         INTEGER(our_int), INTENT(IN) :: choice_lagged
         INTEGER(our_int), INTENT(IN) :: period
-        INTEGER(our_int), INTENT(IN) :: type_
-        INTEGER(our_int), INTENT(IN) :: exp_
+        INTEGER(our_int), INTENT(IN) :: type
+        INTEGER(our_int), INTENT(IN) :: exp
         
         INTEGER(our_int), INTENT(IN) :: edu
 
@@ -224,12 +224,12 @@ CONTAINS
         edu_lagged = TRANSFER(choice_lagged .EQ. two_int, our_int)
 
 
-        cond = ((exp_ .GT. 0) .AND. choice_lagged .NE. one_int)
-        covariates%not_exp_lagged = TRANSFER(cond, our_int)
+        cond = ((exp .GT. 0) .AND. choice_lagged .NE. one_int)
+        covariates%not_explagged = TRANSFER(cond, our_int)
 	covariates%work_lagged = TRANSFER(choice_lagged .EQ. one_int, our_int)
         covariates%edu_lagged = TRANSFER(choice_lagged .EQ. two_int, our_int)
-        covariates%not_any_exp = TRANSFER(exp_ .EQ. 0, our_int)
-        covariates%any_exp = TRANSFER(exp_ .GT. 0, our_int)
+        covariates%not_any_exp = TRANSFER(exp .EQ. 0, our_int)
+        covariates%any_exp = TRANSFER(exp .GT. 0, our_int)
         covariates%is_minor = TRANSFER(period .LT. 3, our_int)
         covariates%is_young_adult = TRANSFER(((period .GE. 3) .AND. (period .LT. 6)), our_int)
         covariates%is_adult = TRANSFER(period .GE. 6, our_int)
@@ -245,8 +245,8 @@ CONTAINS
             TRANSFER((.NOT. to_boolean(edu_lagged)) .AND. to_boolean(hs_graduate), our_int)
 	covariates%choice_lagged = choice_lagged
         covariates%period = period
-        covariates%exp_ = exp_
-	covariates%type = type_
+        covariates%exp = exp
+	covariates%type = type
         covariates%edu = edu
 
     END FUNCTION
@@ -314,7 +314,7 @@ CONTAINS
     END SUBROUTINE
     !***********************************************************************************************
     !***********************************************************************************************
-    FUNCTION back_out_systematic_wages(rewards_systematic, exp_, edu, choice_lagged, &
+    FUNCTION back_out_systematic_wages(rewards_systematic, exp, edu, choice_lagged, &
             optim_paras) RESULT(wages_systematic)
 
         !/* external objects        */
@@ -324,7 +324,7 @@ CONTAINS
         TYPE(OPTIMPARAS_DICT), INTENT(IN) :: optim_paras
 
         INTEGER(our_int), INTENT(IN) :: choice_lagged
-        INTEGER(our_int), INTENT(IN) :: exp_
+        INTEGER(our_int), INTENT(IN) :: exp
 
         INTEGER(our_int), INTENT(IN) :: edu
 
@@ -345,9 +345,9 @@ CONTAINS
         ! Algorithm
         !-------------------------------------------------------------------------------
 
-        covariates = construct_covariates(exp_, edu, choice_lagged, MISSING_INT, MISSING_INT)
+        covariates = construct_covariates(exp, edu, choice_lagged, MISSING_INT, MISSING_INT)
 
-        covars_general = (/ one_int, covariates%not_exp_lagged, covariates%not_any_exp /)
+        covars_general = (/ one_int, covariates%not_explagged, covariates%not_any_exp /)
         general = DOT_PRODUCT(covars_general, optim_paras%coeffs_work(11:13))
 
 
@@ -394,7 +394,7 @@ CONTAINS
         REAL(our_dble) :: emaxs(3)
 
         INTEGER(our_int) :: choice_lagged
-        INTEGER(our_int) :: exp_
+        INTEGER(our_int) :: exp
 	        
         INTEGER(our_int) :: edu
         INTEGER(our_int) :: i
@@ -404,11 +404,11 @@ CONTAINS
         !------------------------------------------------------------------------------
         
         ! We need to back out the wages from the total systematic rewards to working in the labor market to add the shock properly.
-        exp_ = states_all(period + 1, k + 1, 1)
+        exp = states_all(period + 1, k + 1, 1)
 	edu = states_all(period + 1, k + 1, 2)
         choice_lagged = states_all(period + 1, k + 1, 3)
         
-        wages_systematic = back_out_systematic_wages(rewards_systematic, exp_, edu, choice_lagged, optim_paras)
+        wages_systematic = back_out_systematic_wages(rewards_systematic, exp, edu, choice_lagged, optim_paras)
         
         ! Initialize containers
         rewards_ex_post = zero_dble
@@ -464,9 +464,9 @@ SUBROUTINE get_emaxs(emaxs, mapping_state_idx, period, periods_emax, k, states_a
         !/* internals objects       */
 
         INTEGER(our_int) :: future_idx
-        INTEGER(our_int) :: exp_
+        INTEGER(our_int) :: exp
 
-        INTEGER(our_int) :: type_
+        INTEGER(our_int) :: type
         INTEGER(our_int) :: edu
 
         !------------------------------------------------------------------------------
@@ -474,13 +474,13 @@ SUBROUTINE get_emaxs(emaxs, mapping_state_idx, period, periods_emax, k, states_a
         !------------------------------------------------------------------------------
         
         ! Distribute state space
-        exp_ = states_all(period + 1, k + 1, 1)
+        exp = states_all(period + 1, k + 1, 1)
         edu = states_all(period + 1, k + 1, 2)
-        type_ = states_all(period + 1, k + 1, 4)
+        type = states_all(period + 1, k + 1, 4)
         
        
         ! Working in Occupation A
-        future_idx = mapping_state_idx(period + 1 + 1, exp_ + 1 + 1, edu + 1, 1, type_)
+        future_idx = mapping_state_idx(period + 1 + 1, exp + 1 + 1, edu + 1, 1, type)
         emaxs(1) = periods_emax(period + 1 + 1, future_idx + 1)
         
 
@@ -491,13 +491,13 @@ SUBROUTINE get_emaxs(emaxs, mapping_state_idx, period, periods_emax, k, states_a
         IF(edu .GE. edu_spec%max) THEN
             emaxs(2) = zero_dble
         ELSE
-            future_idx = mapping_state_idx(period + 1 + 1, exp_ + 1, edu + 1 + 1, 2, type_)
+            future_idx = mapping_state_idx(period + 1 + 1, exp + 1, edu + 1 + 1, 2, type)
             emaxs(2) = periods_emax(period + 1 + 1, future_idx + 1)
         END IF
         
 
         ! Staying at home
-        future_idx = mapping_state_idx(period + 1 + 1, exp_ + 1, edu + 1, 3, type_)
+        future_idx = mapping_state_idx(period + 1 + 1, exp + 1, edu + 1, 3, type)
         emaxs(3) = periods_emax(period + 1 + 1, future_idx + 1)
 
     END SUBROUTINE

@@ -371,7 +371,7 @@ def input_output_immediate_rewards_occupation():
     if states_to_check[1] < 12:
         manually_calculated_result = manually_calculated_result
     elif states_to_check[1] < 15:
-        manually_calculated_result = model_object.model_object.coeffs_common[0] + manually_calculated_result
+        manually_calculated_result = model_object.coeffs_common[0] + manually_calculated_result
     else:
         manually_calculated_result = (
             model_object.coeffs_common[0] + model_object.coeffs_common[1] + manually_calculated_result
