@@ -102,7 +102,7 @@ def return_simulated_shocks(model_object,simulation=False):
 
 
 
-def backward_induction_procedure(model_object, state_space_info,periods_rewards_systematic, periods_draws_emax ):
+def backward_induction_procedure(model_object, state_space_info,periods_rewards_systematic):
     '''
     Performs backward induction procedure on the whole state space:
     ARGS:
@@ -118,7 +118,7 @@ def backward_induction_procedure(model_object, state_space_info,periods_rewards_
              ]
     args += [model_object.num_periods,
              state_space_info["max_states_period"],
-             periods_draws_emax,
+             model_object.periods_draws_emax,
              model_object.num_draws_emax
              ]
 
@@ -152,7 +152,7 @@ def simulate(model_object):
     periods_rewards_systematic = return_immediate_rewards(model_object,state_space_info)
     #periods_draws_emax = return_simulated_shocks(model_object)
     #periods_draws_sims = return_simulated_shocks(model_object,True)
-    periods_emax = backward_induction_procedure(model_object,state_space_info,periods_rewards_systematic, model_object.periods_draws_emax)
+    periods_emax = backward_induction_procedure(model_object,state_space_info,periods_rewards_systematic)
 
     #sample_lagged_start = np.random.choice([3, 3], p=[0.1, 0.9], size=model_object.num_agents_sim)
     #sample_edu_start = np.random.choice(model_object.edu_spec_start, size=model_object.num_agents_sim)

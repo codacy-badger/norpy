@@ -1,3 +1,10 @@
+"""
+I clipped shocks to be less than 10 mio for testing purposes.
+There might be a m ore elgenat way to do this! 
+
+
+"""
+
 import pathlib
 import yaml
 import copy
@@ -209,7 +216,7 @@ def get_random_model_specification(constr=None):
 
     init_dict = dict()
     init_dict["num_types"] = np.random.randint(1, 5)
-    init_dict["num_periods"] = np.random.randint(1, 10)
+    init_dict["num_periods"] = np.random.randint(2, 10)
     init_dict["num_edu_start"] = np.random.randint(1, 4)
     init_dict["edu_spec_max"] = np.random.randint(15, 25)
     init_dict["edu_spec_start"] = np.random.choice(
@@ -230,13 +237,13 @@ def get_random_model_specification(constr=None):
     args = (np.zeros(3), init_dict["shocks_cov"], (init_dict["num_periods"], init_dict["num_draws_emax"]))
 
     init_dict["periods_draws_emax"] = np.random.multivariate_normal(*args)
-    init_dict["periods_draws_emax"][:, :, :2] = np.clip(np.exp(init_dict["periods_draws_emax"][:, :, :2]), 0.0, HUGE_FLOAT)
+    init_dict["periods_draws_emax"][:, :, :2] = np.clip(np.exp(init_dict["periods_draws_emax"][:, :, :2]), 0.0, 10000000)
 
     args = (np.zeros(3), init_dict["shocks_cov"], (init_dict["num_periods"], init_dict["num_agents_sim"]))
 
     init_dict["periods_draws_sims"] = np.random.multivariate_normal(*args)
     init_dict["periods_draws_sims"][:, :, :2] = np.clip(np.exp(init_dict["periods_draws_sims"][:, :, :2]), 0.0,
-                                                        HUGE_FLOAT)
+                                                        10000000)
 
     init_dict["sample_lagged_start"] = np.random.choice([3, 3], p=[0.1, 0.9], size=init_dict["num_agents_sim"])
 
