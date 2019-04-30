@@ -58,12 +58,6 @@ class ModelSpec(typing.NamedTuple):
     coeffs_edu: np.ndarray
     num_agents_sim: int
     delta: float
-    periods_draws_emax: np.ndarray
-    periods_draws_sims: np.ndarray
-    sample_lagged_start: np.ndarray
-    sample_edu_start: np.ndarray
-    sample_types: np.ndarray
-
     # We make some of the private methods of the base class
     # public.
     def as_dict(self):
@@ -111,12 +105,7 @@ class ModelSpec(typing.NamedTuple):
                 "coeffs_edu",
                 "type_spec_shifts",
                 "edu_spec_start",
-                "shocks_cov",
-                "periods_draws_emax",
-                "periods_draws_sims",
-                "sample_lagged_start",
-                "sample_edu_start",
-                "sample_types",
+                "shocks_cov"
             ]:
                 assert isinstance(attr, np.ndarray)
             else:
@@ -198,12 +187,8 @@ def get_random_model_specification(constr=None):
             "coeffs_edu",
             "coeffs_work",
             "type_spec_shifts",
-            "shocks_cov",
-            "periods_draws_emax",
-            "periods_draws_sims",
-            "sample_lagged_start",
-            "sample_edu_start",
-            "sample_types",
+            "shocks_cov"
+
         ]
         for x in list_of_var:
             if x in list(constr.keys()):
@@ -233,34 +218,6 @@ def get_random_model_specification(constr=None):
         np.zeros(3),
         init_dict["shocks_cov"],
         (init_dict["num_periods"], init_dict["num_draws_emax"]),
-    )
-
-    init_dict["periods_draws_emax"] = np.random.multivariate_normal(*args)
-    init_dict["periods_draws_emax"][:, :, :2] = np.clip(
-        np.exp(init_dict["periods_draws_emax"][:, :, :2]), 0.0, 10000000
-    )
-
-    args = (
-        np.zeros(3),
-        init_dict["shocks_cov"],
-        (init_dict["num_periods"], init_dict["num_agents_sim"]),
-    )
-
-    init_dict["periods_draws_sims"] = np.random.multivariate_normal(*args)
-    init_dict["periods_draws_sims"][:, :, :2] = np.clip(
-        np.exp(init_dict["periods_draws_sims"][:, :, :2]), 0.0, 10000000
-    )
-
-    init_dict["sample_lagged_start"] = np.random.choice(
-        [3, 3], p=[0.1, 0.9], size=init_dict["num_agents_sim"]
-    )
-
-    init_dict["sample_edu_start"] = np.random.choice(
-        init_dict["edu_spec_start"], size=init_dict["num_agents_sim"]
-    )
-
-    init_dict["sample_types"] = np.random.choice(
-        range(init_dict["num_types"]), size=init_dict["num_agents_sim"]
     )
 
     process_constraints(constr)
