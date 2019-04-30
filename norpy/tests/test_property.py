@@ -22,10 +22,10 @@ import math
 from norpy.simulate_model import create_state_space, return_immediate_rewards
 from norpy.model_spec import get_random_model_specification, get_model_obj
 
+
 def random_model_object():
     model_object = get_model_obj(get_random_model_specification())
     return model_object
-
 
 
 @pytest.fixture(params=[str(x) for x in list(range(10))])
@@ -37,10 +37,13 @@ def input_output_state_space():
     period = np.random.randint(1, model_object.num_periods + 1)
     # Split up different cases
     type_ = np.random.randint(1, model_object.num_types + 1)
-    edu_start = model_object.edu_spec_start[np.random.randint(len(model_object.edu_spec_start))]
+    edu_start = model_object.edu_spec_start[
+        np.random.randint(len(model_object.edu_spec_start))
+    ]
     exp_a = np.random.randint(period)
-    edu_add = np.random.randint(min(period - exp_a, model_object.edu_spec_max - edu_start))
-
+    edu_add = np.random.randint(
+        min(period - exp_a, model_object.edu_spec_max - edu_start)
+    )
 
     if exp_a == 0:
         if period == 1:
@@ -66,7 +69,9 @@ def input_output_state_space():
 
     manual = np.array([exp_a, edu_start + edu_add, lagged_choice, type_])
 
-    state_space["states_all"] = state_space["states_all"][:, :state_space["max_states_period"], :]
+    state_space["states_all"] = state_space["states_all"][
+        :, : state_space["max_states_period"], :
+    ]
     return state_space["states_all"], manual, period
 
 
@@ -88,7 +93,9 @@ def input_not_output_state_space():
     period = np.random.randint(1, model_object.num_periods + 1)
     # Split up different cases
     type_ = np.random.randint(1, model_object.num_types + 1)
-    edu_start = model_object.edu_spec_start[np.random.randint(len(model_object.edu_spec_start))]
+    edu_start = model_object.edu_spec_start[
+        np.random.randint(len(model_object.edu_spec_start))
+    ]
     exp_a = np.random.randint(period)
     edu_add = np.random.randint(period - exp_a)
     exp_a == 0
@@ -102,7 +109,9 @@ def input_not_output_state_space():
     else:
         lagged_choice = 300000
 
-    state_space["states_all"] = state_space["states_all"][:, :state_space["max_states_period"], :]
+    state_space["states_all"] = state_space["states_all"][
+        :, : state_space["max_states_period"], :
+    ]
     manual = np.array([exp_a, edu_start + edu_add, lagged_choice, type_])
     return state_space["states_all"], manual, period, state_space["max_states_period"]
 
@@ -128,10 +137,19 @@ def input_output_size():
 
     state_space = create_state_space(model_object)
 
-    state_space["states_all"] = state_space["states_all"][:, :state_space["max_states_period"], :]
+    state_space["states_all"] = state_space["states_all"][
+        :, : state_space["max_states_period"], :
+    ]
 
-    max_period = np.where(state_space["states_number_period"] == state_space["max_states_period"])
-    return state_space["states_all"], max_period, state_space["max_states_period"], state_space["states_number_period"]
+    max_period = np.where(
+        state_space["states_number_period"] == state_space["max_states_period"]
+    )
+    return (
+        state_space["states_all"],
+        max_period,
+        state_space["max_states_period"],
+        state_space["states_number_period"],
+    )
 
 
 def test_state_space_3(input_output_size):
@@ -144,9 +162,11 @@ def test_state_space_3(input_output_size):
 @pytest.fixture(params=[str(x) for x in list(range(10))])
 def input_output_dimension():
     model_object = get_model_obj(get_random_model_specification())
-    state_space = create_state_space(model_object,True)
+    state_space = create_state_space(model_object, True)
 
-    state_space["states_all"] = state_space["states_all"][:, : state_space["max_states_period"] + 1, :]
+    state_space["states_all"] = state_space["states_all"][
+        :, : state_space["max_states_period"] + 1, :
+    ]
     period = np.random.randint(1, model_object.num_periods + 1)
 
     if period > 1:
@@ -184,16 +204,22 @@ def test_state_space_dimension(input_output_dimension):
 @pytest.fixture(params=[str(x) for x in list(range(10))])
 def input_output_immediate_rewards_home():
 
-    model_object = get_model_obj(get_random_model_specification(constr={'num_types':4,'type_spec_shifts':np.zeros(12).reshape(4,3)}))
+    model_object = get_model_obj(
+        get_random_model_specification(
+            constr={"num_types": 4, "type_spec_shifts": np.zeros(12).reshape(4, 3)}
+        )
+    )
     state_space = create_state_space(model_object)
-    immediate_rewards = return_immediate_rewards(model_object,state_space)
+    immediate_rewards = return_immediate_rewards(model_object, state_space)
 
     # Randomly draw a position on the state space
     period_to_check = np.random.randint(1, model_object.num_periods + 1)
-    k_to_check = np.random.randint(state_space["states_number_period"][period_to_check - 1])
+    k_to_check = np.random.randint(
+        state_space["states_number_period"][period_to_check - 1]
+    )
     # - one to modify fortran indexing to python indexing
 
-    states_to_check =state_space["states_all"][period_to_check - 1, k_to_check]
+    states_to_check = state_space["states_all"][period_to_check - 1, k_to_check]
     # initialize manual_result
     manually_calculated_result = 0
     # Calculate common part of home rewards
@@ -202,19 +228,27 @@ def input_output_immediate_rewards_home():
     elif states_to_check[1] < 15:
         manually_calculated_result = model_object.coeffs_common[0]
     else:
-        manually_calculated_result = model_object.coeffs_common[0] + model_object.coeffs_common[1]
+        manually_calculated_result = (
+            model_object.coeffs_common[0] + model_object.coeffs_common[1]
+        )
     # Calculate specific part of home rewards
     if 3 <= period_to_check < 6:
 
         manually_calculated_result = (
-            manually_calculated_result + model_object.coeffs_home[0] + model_object.coeffs_home[1]
+            manually_calculated_result
+            + model_object.coeffs_home[0]
+            + model_object.coeffs_home[1]
         )
     elif period_to_check >= 6:
         manually_calculated_result = (
-            manually_calculated_result + model_object.coeffs_home[0] + model_object.coeffs_home[2]
+            manually_calculated_result
+            + model_object.coeffs_home[0]
+            + model_object.coeffs_home[2]
         )
     else:
-        manually_calculated_result = manually_calculated_result + model_object.coeffs_home[0]
+        manually_calculated_result = (
+            manually_calculated_result + model_object.coeffs_home[0]
+        )
 
     return immediate_rewards, period_to_check, manually_calculated_result, k_to_check
 
@@ -224,7 +258,7 @@ def test_immediate_rewards_home(input_output_immediate_rewards_home):
         input_output_immediate_rewards_home[0][
             input_output_immediate_rewards_home[1] - 1,
             input_output_immediate_rewards_home[3],
-            2
+            2,
         ]
         == input_output_immediate_rewards_home[2]
     )
@@ -233,40 +267,58 @@ def test_immediate_rewards_home(input_output_immediate_rewards_home):
 @pytest.fixture(params=[str(x) for x in list(range(10))])
 def input_output_immediate_rewards_educ():
 
-    model_object = get_model_obj(get_random_model_specification(constr={'num_types':4,'type_spec_shifts':np.zeros(12).reshape(4,3)}))
+    model_object = get_model_obj(
+        get_random_model_specification(
+            constr={"num_types": 4, "type_spec_shifts": np.zeros(12).reshape(4, 3)}
+        )
+    )
     state_space = create_state_space(model_object)
-    immediate_rewards = return_immediate_rewards(model_object,state_space)
+    immediate_rewards = return_immediate_rewards(model_object, state_space)
 
     # Randomly draw a position on the state space
     period_to_check = np.random.randint(1, model_object.num_periods + 1)
-    k_to_check = np.random.randint(state_space["states_number_period"][period_to_check - 1])
+    k_to_check = np.random.randint(
+        state_space["states_number_period"][period_to_check - 1]
+    )
     # - one to modify fortran indexing to python indexing
 
-    states_to_check =state_space["states_all"][period_to_check - 1, k_to_check]
+    states_to_check = state_space["states_all"][period_to_check - 1, k_to_check]
     # initialize manual_result
-    manually_calculated_result = model_object.coeffs_edu[0] + model_object.coeffs_edu[5] * (period_to_check - 1)
+    manually_calculated_result = model_object.coeffs_edu[0] + model_object.coeffs_edu[
+        5
+    ] * (period_to_check - 1)
     # Calculate specific part of edu rewards
     if states_to_check[1] < 9:
         if states_to_check[2] != 2:
             manually_calculated_result = (
-                model_object.coeffs_edu[6] + model_object.coeffs_edu[3] + manually_calculated_result
+                model_object.coeffs_edu[6]
+                + model_object.coeffs_edu[3]
+                + manually_calculated_result
             )
         else:
-            manually_calculated_result = model_object.coeffs_edu[6] + manually_calculated_result
+            manually_calculated_result = (
+                model_object.coeffs_edu[6] + manually_calculated_result
+            )
 
     elif states_to_check[1] < 12:
         if states_to_check[2] != 2:
-            manually_calculated_result = model_object.coeffs_edu[3] + manually_calculated_result
+            manually_calculated_result = (
+                model_object.coeffs_edu[3] + manually_calculated_result
+            )
         else:
             manually_calculated_result = manually_calculated_result
 
     elif states_to_check[1] < 15:
         if states_to_check[2] != 2:
             manually_calculated_result = (
-                model_object.coeffs_edu[4] + model_object.coeffs_edu[1] + manually_calculated_result
+                model_object.coeffs_edu[4]
+                + model_object.coeffs_edu[1]
+                + manually_calculated_result
             )
         else:
-            manually_calculated_result = manually_calculated_result + model_object.coeffs_edu[1]
+            manually_calculated_result = (
+                manually_calculated_result + model_object.coeffs_edu[1]
+            )
 
     else:
         if states_to_check[2] != 2:
@@ -278,17 +330,23 @@ def input_output_immediate_rewards_educ():
             )
         else:
             manually_calculated_result = (
-                manually_calculated_result + model_object.coeffs_edu[1] + model_object.coeffs_edu[2]
+                manually_calculated_result
+                + model_object.coeffs_edu[1]
+                + model_object.coeffs_edu[2]
             )
     # Calculate common part of home rewards
 
     if states_to_check[1] < 12:
         manually_calculated_result = manually_calculated_result
     elif states_to_check[1] < 15:
-        manually_calculated_result = model_object.coeffs_common[0] + manually_calculated_result
+        manually_calculated_result = (
+            model_object.coeffs_common[0] + manually_calculated_result
+        )
     else:
         manually_calculated_result = (
-            model_object.coeffs_common[0] + model_object.coeffs_common[1] + manually_calculated_result
+            model_object.coeffs_common[0]
+            + model_object.coeffs_common[1]
+            + manually_calculated_result
         )
 
     return immediate_rewards, period_to_check, k_to_check, manually_calculated_result
@@ -301,7 +359,7 @@ def test_immediate_rewards_educ(input_output_immediate_rewards_educ):
                 input_output_immediate_rewards_educ[0][
                     input_output_immediate_rewards_educ[1] - 1,
                     input_output_immediate_rewards_educ[2],
-                    1
+                    1,
                 ]
             ]
         ),
@@ -312,14 +370,20 @@ def test_immediate_rewards_educ(input_output_immediate_rewards_educ):
 @pytest.fixture(params=[str(x) for x in list(range(10))])
 def input_output_immediate_rewards_occupation():
 
-    model_object = get_model_obj(get_random_model_specification(constr={'num_types':4,'type_spec_shifts':np.zeros(12).reshape(4,3)}))
-    state_space=create_state_space(model_object)
-    immediate_rewards = return_immediate_rewards(model_object,state_space)
+    model_object = get_model_obj(
+        get_random_model_specification(
+            constr={"num_types": 4, "type_spec_shifts": np.zeros(12).reshape(4, 3)}
+        )
+    )
+    state_space = create_state_space(model_object)
+    immediate_rewards = return_immediate_rewards(model_object, state_space)
 
     # Randomly draw a position on the state space
     period_to_check = np.random.randint(1, model_object.num_periods + 1)
 
-    k_to_check = np.random.randint(state_space["states_number_period"][period_to_check - 1])
+    k_to_check = np.random.randint(
+        state_space["states_number_period"][period_to_check - 1]
+    )
     # - one to modify fortran indexing to python indexing
 
     states_to_check = state_space["states_all"][period_to_check - 1, k_to_check]
@@ -360,10 +424,14 @@ def input_output_immediate_rewards_occupation():
     )
     if states_to_check[2] != 1:
         if states_to_check[0] == 0:
-            manually_calculated_result = manually_calculated_result + model_object.coeffs_work[12]
+            manually_calculated_result = (
+                manually_calculated_result + model_object.coeffs_work[12]
+            )
 
         else:
-            manually_calculated_result = manually_calculated_result + model_object.coeffs_work[11]
+            manually_calculated_result = (
+                manually_calculated_result + model_object.coeffs_work[11]
+            )
 
     # Calculate specific part of edu rewards
     # Calculate common part of home rewards
@@ -371,10 +439,14 @@ def input_output_immediate_rewards_occupation():
     if states_to_check[1] < 12:
         manually_calculated_result = manually_calculated_result
     elif states_to_check[1] < 15:
-        manually_calculated_result = model_object.coeffs_common[0] + manually_calculated_result
+        manually_calculated_result = (
+            model_object.coeffs_common[0] + manually_calculated_result
+        )
     else:
         manually_calculated_result = (
-            model_object.coeffs_common[0] + model_object.coeffs_common[1] + manually_calculated_result
+            model_object.coeffs_common[0]
+            + model_object.coeffs_common[1]
+            + manually_calculated_result
         )
     # Calculate specific part of home rewards
 
@@ -389,7 +461,7 @@ def test_immediate_rewards_occupation(input_output_immediate_rewards_occupation)
                 input_output_immediate_rewards_occupation[0][
                     input_output_immediate_rewards_occupation[1] - 1,
                     input_output_immediate_rewards_occupation[2],
-                    0
+                    0,
                 ]
             ]
         ),

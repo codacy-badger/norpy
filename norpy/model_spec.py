@@ -61,9 +61,8 @@ class ModelSpec(typing.NamedTuple):
     periods_draws_emax: np.ndarray
     periods_draws_sims: np.ndarray
     sample_lagged_start: np.ndarray
-    sample_edu_start : np.ndarray
+    sample_edu_start: np.ndarray
     sample_types: np.ndarray
-
 
     # We make some of the private methods of the base class
     # public.
@@ -117,7 +116,7 @@ class ModelSpec(typing.NamedTuple):
                 "periods_draws_sims",
                 "sample_lagged_start",
                 "sample_edu_start",
-                "sample_types"
+                "sample_types",
             ]:
                 assert isinstance(attr, np.ndarray)
             else:
@@ -156,9 +155,6 @@ class ModelSpec(typing.NamedTuple):
     def __ne__(self, other):
         """Check the inequality of two model specification."""
         return not self.__eq__(other)
-
-
-
 
 
 def get_random_model_specification(constr=None):
@@ -207,8 +203,7 @@ def get_random_model_specification(constr=None):
             "periods_draws_sims",
             "sample_lagged_start",
             "sample_edu_start",
-            "sample_types"
-
+            "sample_types",
         ]
         for x in list_of_var:
             if x in list(constr.keys()):
@@ -230,26 +225,43 @@ def get_random_model_specification(constr=None):
     init_dict["coeffs_home"] = np.random.uniform(size=3)
     init_dict["coeffs_edu"] = np.random.uniform(size=7)
     init_dict["coeffs_work"] = np.random.uniform(size=13)
-    init_dict["type_spec_shifts"] = np.random.normal(size=init_dict["num_types"] * 3).reshape(
-        (init_dict["num_types"], 3)
-    )
+    init_dict["type_spec_shifts"] = np.random.normal(
+        size=init_dict["num_types"] * 3
+    ).reshape((init_dict["num_types"], 3))
     init_dict["shocks_cov"] = invwishart.rvs(df=3, scale=np.identity(3))
-    args = (np.zeros(3), init_dict["shocks_cov"], (init_dict["num_periods"], init_dict["num_draws_emax"]))
+    args = (
+        np.zeros(3),
+        init_dict["shocks_cov"],
+        (init_dict["num_periods"], init_dict["num_draws_emax"]),
+    )
 
     init_dict["periods_draws_emax"] = np.random.multivariate_normal(*args)
-    init_dict["periods_draws_emax"][:, :, :2] = np.clip(np.exp(init_dict["periods_draws_emax"][:, :, :2]), 0.0, 10000000)
+    init_dict["periods_draws_emax"][:, :, :2] = np.clip(
+        np.exp(init_dict["periods_draws_emax"][:, :, :2]), 0.0, 10000000
+    )
 
-    args = (np.zeros(3), init_dict["shocks_cov"], (init_dict["num_periods"], init_dict["num_agents_sim"]))
+    args = (
+        np.zeros(3),
+        init_dict["shocks_cov"],
+        (init_dict["num_periods"], init_dict["num_agents_sim"]),
+    )
 
     init_dict["periods_draws_sims"] = np.random.multivariate_normal(*args)
-    init_dict["periods_draws_sims"][:, :, :2] = np.clip(np.exp(init_dict["periods_draws_sims"][:, :, :2]), 0.0,
-                                                        10000000)
+    init_dict["periods_draws_sims"][:, :, :2] = np.clip(
+        np.exp(init_dict["periods_draws_sims"][:, :, :2]), 0.0, 10000000
+    )
 
-    init_dict["sample_lagged_start"] = np.random.choice([3, 3], p=[0.1, 0.9], size=init_dict["num_agents_sim"])
+    init_dict["sample_lagged_start"] = np.random.choice(
+        [3, 3], p=[0.1, 0.9], size=init_dict["num_agents_sim"]
+    )
 
-    init_dict["sample_edu_start"] = np.random.choice(init_dict["edu_spec_start"], size=init_dict["num_agents_sim"])
+    init_dict["sample_edu_start"] = np.random.choice(
+        init_dict["edu_spec_start"], size=init_dict["num_agents_sim"]
+    )
 
-    init_dict["sample_types"] = np.random.choice(range(init_dict["num_types"]), size=init_dict["num_agents_sim"])
+    init_dict["sample_types"] = np.random.choice(
+        range(init_dict["num_types"]), size=init_dict["num_agents_sim"]
+    )
 
     process_constraints(constr)
 

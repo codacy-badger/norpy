@@ -20,12 +20,7 @@ DATA_LABELS_SIM += ["Systematic_Reward_1", "Systematic_Reward_2"]
 DATA_LABELS_SIM += ["Systematic_Reward_3"]
 DATA_LABELS_SIM += ["Shock_Reward_1", "Shock_Reward_2"]
 DATA_LABELS_SIM += ["Shock_Reward_3"]
-DATA_LABELS_SIM += [
-    "Discount_Rate",
-    "General_Reward",
-    
-    "Common_Reward",
-]
+DATA_LABELS_SIM += ["Discount_Rate", "General_Reward", "Common_Reward"]
 DATA_LABELS_SIM += ["Immediate_Reward_1", "Immediate_Reward_2", "Immediate_Reward_3"]
 
 
@@ -43,4 +38,3 @@ for key_ in DATA_LABELS_SIM:
         DATA_FORMATS_SIM[key_] = np.int
     else:
         DATA_FORMATS_SIM[key_] = np.float
-

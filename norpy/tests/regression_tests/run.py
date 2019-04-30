@@ -1,9 +1,9 @@
-'''
+"""
 
 
 
 
-'''
+"""
 import os
 import argparse
 import pickle
@@ -46,10 +46,9 @@ def create_vault(num_test=100, seed=123456):
 
         np.random.seed(seed)
 
-
         init_dict = get_random_model_specification()
-        #I sthat fine like this or should I first save to yaml and then give the input ?
-        #I dont see how that is better
+        # I sthat fine like this or should I first save to yaml and then give the input ?
+        # I dont see how that is better
         model_object = get_model_obj(init_dict)
 
         df = simulate(model_object)
@@ -57,8 +56,6 @@ def create_vault(num_test=100, seed=123456):
         stat = np.sum(df.sum())
 
         tests += [(stat, init_dict)]
-
-
 
     pickle.dump(tests, open(file_dir, str("wb")))
 
@@ -71,7 +68,6 @@ def check_vault():
     tests = pickle.load(open(file_dir, "rb"))
     for test in tests:
 
-
         stat, init_dict = test
         print(init_dict)
         df = simulate(get_model_obj(init_dict))
@@ -79,12 +75,6 @@ def check_vault():
         stat_new = np.sum(df.sum())
 
         np.testing.assert_array_almost_equal(stat, stat_new)
-
-
-
-
-
-
 
 
 if __name__ == "__main__":
@@ -118,9 +108,3 @@ if __name__ == "__main__":
     elif request == "create":
 
         create_vault(num_test, seed)
-
-
-
-
-
-
