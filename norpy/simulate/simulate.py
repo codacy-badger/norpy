@@ -18,31 +18,30 @@ FLAGS_DEBUG += ["-Wunused-parameter", "-fwhole-file", "-fcheck=all"]
 FLAGS_DEBUG += ["-fbacktrace", "-g", "-fmax-errors=1", "-ffree-line-length-0"]
 FLAGS_DEBUG += ["-cpp", "-Wcharacter-truncation", "-Wimplicit-interface"]
 
-numpy.random.seed(1234)
+np.random.seed(1234)
 
-if True:
 
-    cmd = "git clean -df"
-    os.system(cmd)
+cmd = "git clean -df"
+os.system(cmd)
 
-    # We need to process in two steps. First we compile a library and then use it in a special
-    # F2PY interface for Python.
-    os.chdir("norpy/solve")
+# We need to process in two steps. First we compile a library and then use it in a special
+# F2PY interface for Python.
+os.chdir("norpy/solve")
 
-    cmd = "gfortran -c -fPIC lib_norpy.f90"
-    os.system(cmd)
+cmd = "gfortran -c -fPIC lib_norpy.f90"
+os.system(cmd)
 
-    cmd = "ar crs libnorpy.a lib_norpy.o"
-    os.system(cmd)
+cmd = "ar crs libnorpy.a lib_norpy.o"
+os.system(cmd)
 
-    args = ""
-    args += "--f90exec=gfortran --f90flags=" + '"' + " ".join(FLAGS_DEBUG) + '" '
-    args += "-L. -lnorpy -llapack"
+args = ""
+args += "--f90exec=gfortran --f90flags=" + '"' + " ".join(FLAGS_DEBUG) + '" '
+args += "-L. -lnorpy -llapack"
 
-    src = open("norpy_hatchery.f90", "rb").read()
-    f2py.compile(src, "norpy_hatchery", args, extension=".f90")
+src = open("norpy_hatchery.f90", "rb").read()
+f2py.compile(src, "norpy_hatchery", args, extension=".f90")
 
-    os.chdir("../../")
+os.chdir("../../")
 
 from norpy.solve.norpy_hatchery import f2py_calculate_immediate_rewards
 from norpy.solve.norpy_hatchery import f2py_create_state_space
@@ -101,7 +100,7 @@ def return_immediate_rewards(model_object, state_space_info):
 
 
 def return_simulated_shocks(model_object, simulation=False):
-    numpy.random.seed(1234)
+    np.random.seed(1234)
     if simulation == True:
         args = (
             np.zeros(3),
@@ -134,7 +133,7 @@ def backward_induction_procedure(
     RETURNS:
 
 """
-    numpy.random.seed(1234)
+
     args = list()
     args += [
         state_space_info["states_all"],
@@ -166,7 +165,7 @@ def simulate(model_object):
 
 
     """
-    numpy.random.seed(1234)
+    np.random.seed(1234)
     state_space_info = create_state_space(model_object)
     periods_rewards_systematic = return_immediate_rewards(
         model_object, state_space_info
