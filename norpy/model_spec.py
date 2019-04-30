@@ -15,15 +15,8 @@ from scipy.stats import invwishart
 # The typing module requires the use of
 # Python 3.6 or higher.
 import typing
-from norpy.tests.auxiliary import DATA_FORMATS_SIM
-from norpy.tests.auxiliary import DATA_LABELS_SIM
-from norpy.tests.auxiliary import MISSING_FLOAT
-from norpy.tests.auxiliary import MISSING_INT
-from norpy.tests.auxiliary import HUGE_FLOAT
 
 # Question how would I proceed with the intermediate model objects?
-
-
 class ModelSpec(typing.NamedTuple):
     """Model specification.
 

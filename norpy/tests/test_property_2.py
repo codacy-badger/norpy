@@ -1,13 +1,7 @@
 """
 This module contains the second property testing battery
-
-
-
 """
-
-
 import os
-
 
 from numpy import f2py
 import pandas as pd
@@ -16,14 +10,13 @@ import pytest
 import math
 import pytest
 
-from norpy.simulate_model import (
+from norpy.simulate.simulate import (
     create_state_space,
     return_immediate_rewards,
     backward_induction_procedure,
     simulate,
 )
 from norpy.model_spec import get_random_model_specification, get_model_obj
-
 
 def random_model_object():
     model_object = get_model_obj(get_random_model_specification())

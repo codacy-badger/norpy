@@ -19,7 +19,7 @@ import numpy as np
 import pytest
 import math
 
-from norpy.simulate_model import create_state_space, return_immediate_rewards
+from norpy.simulate.simulate import create_state_space, return_immediate_rewards
 from norpy.model_spec import get_random_model_specification, get_model_obj
 
 

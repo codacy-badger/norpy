@@ -101,7 +101,7 @@ def return_immediate_rewards(model_object, state_space_info):
 
 
 def return_simulated_shocks(model_object, simulation=False):
-
+    numpy.random.seed(1234)
     if simulation == True:
         args = (
             np.zeros(3),
@@ -134,6 +134,7 @@ def backward_induction_procedure(
     RETURNS:
 
 """
+    numpy.random.seed(1234)
     args = list()
     args += [
         state_space_info["states_all"],
@@ -165,7 +166,7 @@ def simulate(model_object):
 
 
     """
-
+    numpy.random.seed(1234)
     state_space_info = create_state_space(model_object)
     periods_rewards_systematic = return_immediate_rewards(
         model_object, state_space_info

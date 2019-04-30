@@ -8,5 +8,5 @@ import numpy as np
 np.testing.assert_equal(sys.version_info[:2] >= (3, 6), True)
 
 # We rely on relative paths throughout the package.
-PACKAGE_DIR = Path(__file__).parent.parent.absolute()
-TEST_RESOURCES_DIR = PACKAGE_DIR / "norpy" / "tests" / "resources"
+PACKAGE_DIR = Path(__file__).parent.absolute()
+TEST_RESOURCES_DIR = PACKAGE_DIR  / "tests" 
