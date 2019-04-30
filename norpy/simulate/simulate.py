@@ -18,9 +18,6 @@ FLAGS_DEBUG += ["-Wunused-parameter", "-fwhole-file", "-fcheck=all"]
 FLAGS_DEBUG += ["-fbacktrace", "-g", "-fmax-errors=1", "-ffree-line-length-0"]
 FLAGS_DEBUG += ["-cpp", "-Wcharacter-truncation", "-Wimplicit-interface"]
 
-np.random.seed(1234)
-
-
 cmd = "git clean -df"
 os.system(cmd)
 
@@ -48,12 +45,14 @@ from norpy.solve.norpy_hatchery import f2py_create_state_space
 from norpy.solve.norpy_hatchery import f2py_backward_induction
 from norpy.solve.norpy_hatchery import f2py_simulate
 
-from norpy.simulate.auxiliary import DATA_FORMATS_SIM
-from norpy.simulate.auxiliary import DATA_LABELS_SIM
-from norpy.simulate.auxiliary import MISSING_FLOAT
-from norpy.simulate.auxiliary import MISSING_INT
-from norpy.simulate.auxiliary import HUGE_FLOAT
-from norpy.simulate.auxiliary import LARGE_FLOAT
+from norpy.simulate.simulate_auxiliary import DATA_FORMATS_SIM
+from norpy.simulate.simulate_auxiliary import DATA_LABELS_SIM
+from norpy.simulate.simulate_auxiliary import MISSING_FLOAT
+from norpy.simulate.simulate_auxiliary import MISSING_INT
+from norpy.simulate.simulate_auxiliary import HUGE_FLOAT
+from norpy.simulate.simulate_auxiliary import LARGE_FLOAT
+
+np.random.seed(1234)
 
 def create_state_space(model_object, boolean=False):
     args = (
