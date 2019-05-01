@@ -1,7 +1,5 @@
 """
-This file simulates a model object and retruns the result
-TODO:
-auxiliary.py file should become part of model specs !
+
 """
 
 import os
@@ -202,5 +200,4 @@ def simulate(model_object,seed = REFERENCE_SEED):
     ]
 
     dat = f2py_simulate(*args)
-
     return dat
