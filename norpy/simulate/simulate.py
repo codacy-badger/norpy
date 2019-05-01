@@ -39,8 +39,8 @@ if True:
     args += "--f90exec=gfortran --f90flags=" + '"' + " ".join(FLAGS_DEBUG) + '" '
     args += "-L. -lnorpy -llapack"
 
-    src = open("norpy_hatchery.f90", "rb").read()
-    f2py.compile(src, "norpy_hatchery", args, extension=".f90")
+    solve = open("norpy_hatchery.f90", "rb").read()
+    f2py.compile(solve, "norpy_hatchery", args, extension=".f90")
 
     os.chdir('../../')
 
@@ -56,8 +56,9 @@ from norpy.simulate.simulate_auxiliary import MISSING_FLOAT
 from norpy.simulate.simulate_auxiliary import MISSING_INT
 from norpy.simulate.simulate_auxiliary import HUGE_FLOAT
 from norpy.simulate.simulate_auxiliary import LARGE_FLOAT
+from norpy.simulate.simulate_auxiliary import REFERENCE_SEED
 
-np.random.seed(1234)
+
 
 def create_state_space(model_object, boolean=False):
     args = (
@@ -103,8 +104,8 @@ def return_immediate_rewards(model_object, state_space_info):
     return periods_rewards_systematic
 
 
-def return_simulated_shocks(model_object, simulation=False):
-    np.random.seed(1234)
+def return_simulated_shocks(model_object, simulation=False, seed):
+    np.random.seed(seed)
     if simulation == True:
         args = (
             np.zeros(3),
@@ -158,7 +159,7 @@ def backward_induction_procedure(
     return periods_emax
 
 
-def simulate(model_object):
+def simulate(model_object,seed = REFERENCE_SEED):
     """
     Simulate the full model and return relevant results:
     All intermediate results are saved as local variables and all inputs are stored in a
@@ -169,13 +170,13 @@ def simulate(model_object):
 
 
     """
-    np.random.seed(1234)
+    np.random.seed(seed)
     state_space_info = create_state_space(model_object)
     periods_rewards_systematic = return_immediate_rewards(
         model_object, state_space_info
     )
-    periods_draws_emax = return_simulated_shocks(model_object)
-    periods_draws_sims = return_simulated_shocks(model_object,True)
+    periods_draws_emax = return_simulated_shocks(model_object,seed)
+    periods_draws_sims = return_simulated_shocks(model_object,seed,True)
     periods_emax = backward_induction_procedure(
         model_object, state_space_info, periods_rewards_systematic, periods_draws_emax
     )

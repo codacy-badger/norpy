@@ -4,6 +4,7 @@ HUGE_FLOAT = 1.0e20
 MISSING_FLOAT = -99.00
 MISSING_INT = -99
 LARGE_FLOAT = 10000000
+REFERENCE_SEED = 1234
 
 # Labels for columns in a dataset as well as the formatters.
 DATA_LABELS_EST = []
