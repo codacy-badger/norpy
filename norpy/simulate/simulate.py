@@ -13,10 +13,9 @@ import numpy as np
 
 # If you need to compile the F2PY interface again.
 FLAGS_DEBUG = []
-
 FLAGS_DEBUG += ['-O', '-Wall', '-Wline-truncation', '-Wsurprising', '-Waliasing']
 FLAGS_DEBUG += ['-Wunused-parameter', '-fwhole-file', '-fcheck=all']
-FLAGS_DEBUG += ['-fbacktrace', '-g', '-fmax-errors=1', '-ffree-line-length-0']
+FLAGS_DEBUG += ['-fbacktrace', '-fmax-errors=1', '-ffree-line-length-0']
 FLAGS_DEBUG += ['-cpp', '-Wcharacter-truncation', '-Wimplicit-interface']
 
 
@@ -37,7 +36,7 @@ if True:
 
     args = ""
     args += "--f90exec=gfortran --f90flags=" + '"' + " ".join(FLAGS_DEBUG) + '" '
-    args += "-L. -lnorpy -llapack"
+    args += "-L. -lnorpy -llapack "
 
     solve = open("norpy_hatchery.f90", "rb").read()
     f2py.compile(solve, "norpy_hatchery", args, extension=".f90")
@@ -104,7 +103,7 @@ def return_immediate_rewards(model_object, state_space_info):
     return periods_rewards_systematic
 
 
-def return_simulated_shocks(model_object, simulation=False, seed):
+def return_simulated_shocks(model_object,seed, simulation=False):
     np.random.seed(seed)
     if simulation == True:
         args = (
