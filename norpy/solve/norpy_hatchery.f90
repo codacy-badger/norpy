@@ -28,7 +28,8 @@ SUBROUTINE f2py_create_state_space(states_all, states_number_period, mapping_sta
     INTEGER :: edu_start
     INTEGER :: edu_add
     INTEGER :: period
-    INTEGER :: type
+    INTEGER :: type_
+
     INTEGER :: exp 
     INTEGER :: k
     INTEGER :: j
@@ -59,7 +60,7 @@ SUBROUTINE f2py_create_state_space(states_all, states_number_period, mapping_sta
         k = 0
 
         ! Loop over all types.
-        DO type = 1, num_types 
+        DO type_ = 1, num_types 
 
             ! Loop over all initial level of schooling
             DO j = 1, num_edu_start
@@ -103,16 +104,16 @@ SUBROUTINE f2py_create_state_space(states_all, states_number_period, mapping_sta
                                 ! (3, 1) An individual that has never worked in Occupation B cannot have a that lagged activity.
                                      
                                 IF (test_indication .EQV. .FALSE.) THEN
-                                    IF (mapping_state_idx(period, exp + 1 ,edu_start + edu_add + 1 , choice_lagged, type)&
+                                    IF (mapping_state_idx(period, exp + 1 ,edu_start + edu_add + 1 , choice_lagged, type_)&
 					&.NE. MISSING_INT) CYCLE
                                 
                                 END IF
 
                                 ! ! Collect mapping of state space to array index.
-                                mapping_state_idx(period , exp + 1 , edu_start + edu_add + 1 , choice_lagged, type ) = k
+                                mapping_state_idx(period , exp + 1 , edu_start + edu_add + 1 , choice_lagged, type_ ) = k
 
                                 ! Collect all possible realizations of state space
-                                states_all(period, k + 1 , :) = (/ exp, edu_start + edu_add, choice_lagged, type /)
+                                states_all(period, k + 1 , :) = (/ exp, edu_start + edu_add, choice_lagged, type_ /)
 
                                 ! Update count
                                 k = k + 1
@@ -167,7 +168,7 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
     INTEGER :: covars_home(3)
     INTEGER :: covars_edu(7)
     INTEGER :: period
-    INTEGER :: type
+    INTEGER :: type_
     INTEGER :: exp
     INTEGER :: edu
     INTEGER :: k
@@ -194,10 +195,10 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
             exp = states_all(period, k, 1)
             edu = states_all(period, k, 2)
             choice_lagged = states_all(period, k, 3)
-            type = states_all(period, k, 4)
+            type_ = states_all(period, k, 4)
             
             ! Construct auxiliary information
-            covariates = construct_covariates(exp, edu, choice_lagged, type, period)
+            covariates = construct_covariates(exp, edu, choice_lagged, type_, period)
 
             ! Calculate common and general rewards component.
             rewards_general = calculate_rewards_general(covariates, coeffs_work(11:13))
@@ -228,7 +229,7 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
 
             ! Now we add the type-specific deviation.
             DO i = 2, 3
-                rewards(i) = rewards(i) + type_spec_shifts(type , i - 1)
+                rewards(i) = rewards(i) + type_spec_shifts(type_ , i - 1)
                 !WRITE(*,*) type_spec_shifts(type,1)
             END DO
 
@@ -363,7 +364,7 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, &
     INTEGER(our_int) :: period
     INTEGER(our_int) :: exp
     INTEGER(our_int) :: count
-    INTEGER(our_int) :: type
+    INTEGER(our_int) :: type_
     INTEGER(our_int) :: edu
     INTEGER(our_int) :: i
     INTEGER(our_int) :: k
@@ -398,10 +399,10 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, &
             exp = current_state(1)
             edu = current_state(2)
             choice_lagged = current_state(3)
-            type = current_state(4) !Do we even need that expression???
+            type_ = current_state(4) !Do we even need that expression???
 
             ! Getting state index
-            k = mapping_state_idx(period + 1, exp + 1, edu + 1, choice_lagged, type + 1)
+            k = mapping_state_idx(period + 1, exp + 1, edu + 1, choice_lagged, type_ + 1)
 
             ! Write agent identifier and current period to data frame
             data_sim(count + 1, 1) = DBLE(i)
@@ -442,7 +443,7 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, &
             data_sim(count + 1, 18:18) = optim_paras%delta
 
             ! For testing purposes, we also explicitly include the general reward component and the common component.
-            covariates = construct_covariates(exp, edu, choice_lagged, type, period)
+            covariates = construct_covariates(exp, edu, choice_lagged, type_, period)
             data_sim(count + 1, 19) = calculate_rewards_general(covariates, &
                     optim_paras%coeffs_work)
             data_sim(count + 1, 20) = calculate_rewards_common(covariates, optim_paras%coeffs_common)

@@ -43,7 +43,7 @@ MODULE lib_norpy
         INTEGER(our_int) :: is_adult
         INTEGER(our_int) :: period
         INTEGER(our_int) :: exp
-        INTEGER(our_int) :: type
+        INTEGER(our_int) :: type_
         INTEGER(our_int) :: edu
         INTEGER(our_int) :: is_mandatory
 
@@ -106,7 +106,7 @@ CONTAINS
         covars_wages(9:) = (/ covariates%any_exp, covariates%work_lagged/)
         
         wages = EXP(DOT_PRODUCT(covars_wages, coeffs_work(:10)))
-        wages = wages * EXP(type_shifts(covariates%type + 1,1))
+        wages = wages * EXP(type_shifts(covariates%type_ + 1,1))
         
     END FUNCTION
     !***********************************************************************************************
@@ -184,7 +184,7 @@ CONTAINS
     END FUNCTION
     !***********************************************************************************************
     !***********************************************************************************************
-    FUNCTION construct_covariates(exp, edu, choice_lagged, type, period) RESULT(covariates)
+    FUNCTION construct_covariates(exp, edu, choice_lagged, type_, period) RESULT(covariates)
 
         !/* dummy arguments    */
 
@@ -192,7 +192,7 @@ CONTAINS
 
         INTEGER(our_int), INTENT(IN) :: choice_lagged
         INTEGER(our_int), INTENT(IN) :: period
-        INTEGER(our_int), INTENT(IN) :: type
+        INTEGER(our_int), INTENT(IN) :: type_
         INTEGER(our_int), INTENT(IN) :: exp
         
         INTEGER(our_int), INTENT(IN) :: edu
@@ -234,7 +234,7 @@ CONTAINS
 	covariates%choice_lagged = choice_lagged
         covariates%period = period
         covariates%exp = exp
-	covariates%type = type
+	covariates%type_ = type_
         covariates%edu = edu
 
     END FUNCTION
@@ -435,7 +435,7 @@ CONTAINS
 
 	INTEGER(our_int) :: future_idx
 	INTEGER(our_int) :: exp
-	INTEGER(our_int) :: type
+	INTEGER(our_int) :: type_
 	INTEGER(our_int) :: edu
 
 	!------------------------------------------------------------------------------
@@ -445,22 +445,22 @@ CONTAINS
 	! Distribute state space
 	exp = states_all(period + 1, k + 1, 1)
 	edu = states_all(period + 1, k + 1, 2)
-	type = states_all(period + 1, k + 1, 4)
+	type_ = states_all(period + 1, k + 1, 4)
 
 	! Working in Occupation A
-	future_idx = mapping_state_idx(period + 1 + 1, exp + 1 + 1, edu + 1, 1, type)
+	future_idx = mapping_state_idx(period + 1 + 1, exp + 1 + 1, edu + 1, 1, type_)
 	emaxs(1) = periods_emax(period + 1 + 1, future_idx + 1)
 
 	! Increasing schooling. Note that adding an additional year of schooling is only possible for those that have strictly less than the maximum level of additional education allowed.
 	IF(edu .GE. edu_spec%max) THEN
 	    emaxs(2) = zero_dble
 	ELSE
-	    future_idx = mapping_state_idx(period + 1 + 1, exp + 1, edu + 1 + 1, 2, type)
+	    future_idx = mapping_state_idx(period + 1 + 1, exp + 1, edu + 1 + 1, 2, type_)
 	    emaxs(2) = periods_emax(period + 1 + 1, future_idx + 1)
 	END IF
 
 	! Staying at home
-	future_idx = mapping_state_idx(period + 1 + 1, exp + 1, edu + 1, 3, type)
+	future_idx = mapping_state_idx(period + 1 + 1, exp + 1, edu + 1, 3, type_)
 	emaxs(3) = periods_emax(period + 1 + 1, future_idx + 1)
 
     END FUNCTION

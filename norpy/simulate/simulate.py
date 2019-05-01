@@ -29,7 +29,7 @@ if True:
     cmd = "gfortran -c -fPIC lib_norpy.f90"
     os.system(cmd)
 
-    cmd = "ar crs libnorpy.a lib_norpy.o"
+    cmd = "ar crs libnorpy.a lib_norpy.o lib_norpy.mod"
     os.system(cmd)
 
     args = ""
@@ -125,7 +125,7 @@ def return_simulated_shocks(model_object,seed, simulation=False):
 
 
 def backward_induction_procedure(
-    model_object, state_space_info, periods_rewards_systematic, period_draws_emax
+    model_object, state_space_info, periods_rewards_systematic, periods_draws_emax
 ):
     """
     Performs backward induction procedure on the whole state space:
