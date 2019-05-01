@@ -30,7 +30,7 @@ MODULE lib_norpy
  
         INTEGER(our_int) :: is_return_not_high_school
         INTEGER(our_int) :: is_return_high_school
-        INTEGER(our_int) :: not_explagged
+        INTEGER(our_int) :: not_exp_lagged
         INTEGER(our_int) :: is_young_adult
         INTEGER(our_int) :: choice_lagged
         INTEGER(our_int) :: work_lagged
@@ -51,7 +51,7 @@ MODULE lib_norpy
 
     TYPE OPTIMPARAS_DICT
 
-        REAL(our_dble), ALLOCATABLE :: typeshifts(:, :)
+        REAL(our_dble), ALLOCATABLE :: type_shifts(:, :)
         REAL(our_dble), ALLOCATABLE :: typeshares(:)
         REAL(our_dble) :: coeffs_common(2)
         REAL(our_dble) :: coeffs_home(3)
@@ -75,11 +75,11 @@ CONTAINS
 
     !***********************************************************************************************
     !***********************************************************************************************
-    FUNCTION calculate_wages_systematic(covariates,coeffs_work, typeshifts) RESULT(wages)
+    FUNCTION calculate_wages_systematic(covariates,coeffs_work, type_shifts) RESULT(wages)
 
         !/* dummy arguments        */
 	REAL(our_dble) :: wages 
-        REAL(our_dble), INTENT(IN) :: typeshifts(:, :)
+        REAL(our_dble), INTENT(IN) :: type_shifts(:, :)
         REAL(our_dble), INTENT(IN) :: coeffs_work(13)
         
         TYPE(COVARIATES_DICT), INTENT(IN) :: covariates
@@ -106,7 +106,7 @@ CONTAINS
         covars_wages(9:) = (/ covariates%any_exp, covariates%work_lagged/)
         
         wages = EXP(DOT_PRODUCT(covars_wages, coeffs_work(:10)))
-        wages = wages * EXP(typeshifts(covariates%type + 1,1))
+        wages = wages * EXP(type_shifts(covariates%type + 1,1))
         
     END FUNCTION
     !***********************************************************************************************
@@ -153,7 +153,7 @@ CONTAINS
         ! Algorithm
         !-------------------------------------------------------------------------------------------
 
-        covars_general = (/ one_int, covariates%not_explagged, covariates%not_any_exp /)
+        covars_general = (/ one_int, covariates%not_exp_lagged, covariates%not_any_exp /)
         rewards_general = DOT_PRODUCT(covars_general, coeffs_general)
 
         
@@ -213,7 +213,7 @@ CONTAINS
 
 
         cond = ((exp .GT. 0) .AND. choice_lagged .NE. one_int)
-        covariates%not_explagged = TRANSFER(cond, our_int)
+        covariates%not_exp_lagged = TRANSFER(cond, our_int)
 	covariates%work_lagged = TRANSFER(choice_lagged .EQ. one_int, our_int)
         covariates%edu_lagged = TRANSFER(choice_lagged .EQ. two_int, our_int)
         covariates%not_any_exp = TRANSFER(exp .EQ. 0, our_int)
@@ -332,7 +332,7 @@ CONTAINS
         !-------------------------------------------------------------------------------
         
         covariates = construct_covariates(exp, edu, choice_lagged, MISSING_INT, MISSING_INT)
-	covars_general = (/ one_int, covariates%not_explagged, covariates%not_any_exp /)
+	covars_general = (/ one_int, covariates%not_exp_lagged, covariates%not_any_exp /)
         general = DOT_PRODUCT(covars_general, optim_paras%coeffs_work(11:13))
         
         ! Second we do the same with the common component.

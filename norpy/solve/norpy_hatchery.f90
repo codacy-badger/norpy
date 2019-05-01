@@ -140,7 +140,7 @@ END SUBROUTINE
 !***************************************************************************************************
 SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_periods, &
         states_number_period, states_all, max_states_period, coeffs_common, coeffs_work, &
-        coeffs_edu, coeffs_home, typespec_shifts)
+        coeffs_edu, coeffs_home, type_spec_shifts)
 
     USE lib_norpy
 
@@ -150,7 +150,7 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
 
     DOUBLE PRECISION, INTENT(OUT) :: periods_rewards_systematic(num_periods, max_states_period, 3)
     
-    DOUBLE PRECISION, INTENT(IN) :: typespec_shifts(:, :)
+    DOUBLE PRECISION, INTENT(IN) :: type_spec_shifts(:, :)
     DOUBLE PRECISION, INTENT(IN) :: coeffs_common(2)
     DOUBLE PRECISION, INTENT(IN) :: coeffs_home(3)
     DOUBLE PRECISION, INTENT(IN) :: coeffs_edu(7)
@@ -205,7 +205,7 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
 
             ! Calculate the systematic part of OCCUPATION A and OCCUPATION B rewards. these are defined in a general sense, where not only wages matter.
             ! Only occupation a now will give a REAL instead of an ARRAY
-            wages = calculate_wages_systematic(covariates, coeffs_work, typespec_shifts)
+            wages = calculate_wages_systematic(covariates, coeffs_work, type_spec_shifts)
             rewards(1) = wages + rewards_general
 	    	
             ! Calculate systematic part of schooling utility
@@ -228,8 +228,8 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
 
             ! Now we add the type-specific deviation.
             DO i = 2, 3
-                rewards(i) = rewards(i) + typespec_shifts(type , i - 1)
-                !WRITE(*,*) typespec_shifts(type,1)
+                rewards(i) = rewards(i) + type_spec_shifts(type , i - 1)
+                !WRITE(*,*) type_spec_shifts(type,1)
             END DO
 
             ! We can now also added the common component of rewards.
