@@ -5,40 +5,45 @@ auxiliary.py file should become part of model specs !
 """
 
 import os
-from numpy import f2py
-import numpy as np
-import pandas as pd
+
 from scipy.stats import invwishart
+from numpy import f2py
+import pandas as pd
+import numpy as np
 
-
+# If you need to compile the F2PY interface again.
 FLAGS_DEBUG = []
 
-FLAGS_DEBUG += ["-O", "-Wall", "-Wline-truncation", "-Wsurprising", "-Waliasing"]
-FLAGS_DEBUG += ["-Wunused-parameter", "-fwhole-file", "-fcheck=all"]
-FLAGS_DEBUG += ["-fbacktrace", "-g", "-fmax-errors=1", "-ffree-line-length-0"]
-FLAGS_DEBUG += ["-cpp", "-Wcharacter-truncation", "-Wimplicit-interface"]
+FLAGS_DEBUG += ['-O', '-Wall', '-Wline-truncation', '-Wsurprising', '-Waliasing']
+FLAGS_DEBUG += ['-Wunused-parameter', '-fwhole-file', '-fcheck=all']
+FLAGS_DEBUG += ['-fbacktrace', '-g', '-fmax-errors=1', '-ffree-line-length-0']
+FLAGS_DEBUG += ['-cpp', '-Wcharacter-truncation', '-Wimplicit-interface']
 
-cmd = "git clean -df"
-os.system(cmd)
 
-# We need to process in two steps. First we compile a library and then use it in a special
-# F2PY interface for Python.
-os.chdir("norpy/solve")
+if True:
 
-cmd = "gfortran -c -fPIC lib_norpy.f90"
-os.system(cmd)
+    cmd = "git clean -df"
+    os.system(cmd)
 
-cmd = "ar crs libnorpy.a lib_norpy.o"
-os.system(cmd)
+    # We need to process in two steps. First we compile a library and then use it in a special
+    # F2PY interface for Python.
+    os.chdir("norpy/solve")
 
-args = ""
-args += "--f90exec=gfortran --f90flags=" + '"' + " ".join(FLAGS_DEBUG) + '" '
-args += "-L. -lnorpy -llapack"
+    cmd = "gfortran -c -fPIC lib_norpy.f90"
+    os.system(cmd)
 
-src = open("norpy_hatchery.f90", "rb").read()
-f2py.compile(src, "norpy_hatchery", args, extension=".f90")
+    cmd = "ar crs libnorpy.a lib_norpy.o"
+    os.system(cmd)
 
-os.chdir("../../")
+    args = ""
+    args += "--f90exec=gfortran --f90flags=" + '"' + " ".join(FLAGS_DEBUG) + '" '
+    args += "-L. -lnorpy -llapack"
+
+    src = open("norpy_hatchery.f90", "rb").read()
+    f2py.compile(src, "norpy_hatchery", args, extension=".f90")
+
+    os.chdir('../../')
+
 
 from norpy.solve.norpy_hatchery import f2py_calculate_immediate_rewards
 from norpy.solve.norpy_hatchery import f2py_create_state_space
