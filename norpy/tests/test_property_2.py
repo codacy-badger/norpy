@@ -18,6 +18,7 @@ from norpy.simulate.simulate import (
     return_immediate_rewards,
     backward_induction_procedure,
     simulate,
+    return_simulated_shocks
 )
 from norpy.model_spec import get_random_model_specification, get_model_obj
 
@@ -38,7 +39,7 @@ def set_up_last_period():
     state_space = create_state_space(model_object)
     immediate_rewards = return_immediate_rewards(model_object, state_space)
     
-    periods_draws_emax=return_simulated_shocks(model_object,seed, simulation=False)
+    periods_draws_emax=return_simulated_shocks(model_object, simulation=False)
     periods_emax = backward_induction_procedure(
         model_object, state_space, immediate_rewards,periods_draws_emax
     )
@@ -119,7 +120,7 @@ def set_up_any_period():
     )
     state_space = create_state_space(model_object)
     immediate_rewards = return_immediate_rewards(model_object, state_space)
-    periods_draws_emax=return_simulated_shocks(model_object,seed, simulation=False)
+    periods_draws_emax=return_simulated_shocks(model_object, simulation=False)
     periods_emax = backward_induction_procedure(
         model_object, state_space, immediate_rewards,periods_draws_emax
     )
