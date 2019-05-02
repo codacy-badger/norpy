@@ -1,7 +1,11 @@
 import os
 import pickle
+import sys 
+
+
 
 import numpy as np
+#import pytest
 
 from norpy.simulate.simulate import simulate
 from norpy.norpy_config import TEST_RESOURCES_DIR

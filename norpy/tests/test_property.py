@@ -11,6 +11,7 @@ Also there is still considerable repetition in the selection procedure which has
 
 """
 import os
+import sys 
 
 
 from numpy import f2py

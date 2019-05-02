@@ -2,6 +2,9 @@
 This module contains the second property testing battery
 """
 import os
+import sys
+
+
 
 from numpy import f2py
 import pandas as pd
@@ -34,8 +37,9 @@ def set_up_last_period():
     )
     state_space = create_state_space(model_object)
     immediate_rewards = return_immediate_rewards(model_object, state_space)
+    
     periods_emax = backward_induction_procedure(
-        model_object, state_space, immediate_rewards
+        model_object, state_space, immediate_rewards,periods_draws_emax
     )
 
     k_to_check = np.random.randint(1, state_space["states_number_period"][-1])
