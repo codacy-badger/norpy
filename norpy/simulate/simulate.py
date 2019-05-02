@@ -101,7 +101,7 @@ def return_immediate_rewards(model_object, state_space_info):
     return periods_rewards_systematic
 
 
-def return_simulated_shocks(model_object,seed, simulation=False):
+def return_simulated_shocks(model_object,seed=REFERENCE_SEED, simulation=False):
     np.random.seed(seed)
     if simulation == True:
         args = (

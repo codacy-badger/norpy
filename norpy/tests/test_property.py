@@ -34,7 +34,7 @@ def input_output_state_space():
 
     model_object = random_model_object()
     state_space = create_state_space(model_object)
-
+    
     period = np.random.randint(1, model_object.num_periods + 1)
     # Split up different cases
     type_ = np.random.randint(1, model_object.num_types + 1)

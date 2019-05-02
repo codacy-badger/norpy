@@ -38,13 +38,14 @@ def set_up_last_period():
     state_space = create_state_space(model_object)
     immediate_rewards = return_immediate_rewards(model_object, state_space)
     
+    periods_draws_emax=return_simulated_shocks(model_object,seed, simulation=False)
     periods_emax = backward_induction_procedure(
         model_object, state_space, immediate_rewards,periods_draws_emax
     )
 
     k_to_check = np.random.randint(1, state_space["states_number_period"][-1])
 
-    draws_to_check = model_object.periods_draws_emax[model_object.num_periods - 1]
+    draws_to_check = periods_draws_emax[model_object.num_periods - 1]
 
     immediate_rewards_last_period = immediate_rewards[
         model_object.num_periods - 1, k_to_check
@@ -118,15 +119,16 @@ def set_up_any_period():
     )
     state_space = create_state_space(model_object)
     immediate_rewards = return_immediate_rewards(model_object, state_space)
+    periods_draws_emax=return_simulated_shocks(model_object,seed, simulation=False)
     periods_emax = backward_induction_procedure(
-        model_object, state_space, immediate_rewards
+        model_object, state_space, immediate_rewards,periods_draws_emax
     )
     period_to_check = np.random.randint(0, model_object.num_periods - 1)
     k_to_check = np.random.randint(
         0, state_space["states_number_period"][period_to_check] - 1
     )
 
-    draws_to_check = model_object.periods_draws_emax[period_to_check]
+    draws_to_check = periods_draws_emax[period_to_check]
 
     immediate_rewards_last_period = immediate_rewards[period_to_check, k_to_check]
     state_to_check = state_space["states_all"][period_to_check, k_to_check]
