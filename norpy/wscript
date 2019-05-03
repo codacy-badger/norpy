@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+top = '.'
+out = '.bld'
+
+# Set of compiler options.
+DEBUG_OPTIONS = ['-O', '-Wall', '-Wline-truncation', '-Wcharacter-truncation']
+DEBUG_OPTIONS += ['-Wsurprising', '-Waliasing', '-Wimplicit-interface']
+DEBUG_OPTIONS += ['-Wunused-parameter', '-fwhole-file', '-fcheck=all']
+DEBUG_OPTIONS += ['-fbacktrace', '-g', '-fmax-errors=1', '-ffpe-trap=invalid']
+DEBUG_OPTIONS += ['-ffree-line-length-0']
+
+PRODUCTION_OPTIONS = ['-O3', '-ffree-line-length-0']
+
+
+def options(ctx):
+
+    ctx.load('compiler_c')
+
+    ctx.load('compiler_fc')
+
+    ctx.add_option('--debug', action='store_true', dest='is_debug',
+                   default=False, help='use debug compiler options')
+
+
+def configure(ctx):
+
+    is_debug = ctx.options.is_debug
+
+    ctx.load('compiler_fc')
+
+    # The build is currently only tested for GFORTRAN.
+    if is_debug:
+        ctx.env.append_unique('FCFLAGS', DEBUG_OPTIONS)
+    else:
+        ctx.env.append_unique('FCFLAGS', PRODUCTION_OPTIONS)
+
+    # Enable static libraries
+    ctx.env.append_unique('STLIBPATH', ['../.bld/solve'])
+    ctx.env.append_unique('STLIB', ['norpy'])
+
+    # Enable shared libraries
+    ctx.env.append_unique('LIB', ['lapack'])
+
+
+def build(ctx):
+
+    ctx.recurse('solve')

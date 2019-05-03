@@ -1,0 +1,31 @@
+#!/usr/bin/env python
+import os
+
+from waflib.Task import Task
+from numpy import f2py
+
+
+class CreateF2pyInterfaces(Task):
+
+    def run(self):
+
+        os.chdir('solve')
+
+        extra_args = '--f90flags="-ffree-line-length-0" -I../.bld ' \
+                     '-L../.bld/solve -lnorpy ' \
+                     '-llapack'
+
+        with open('norpy_hatchery.f90', 'rb') as sourcefile:
+            sourcecode = sourcefile.read()
+        f2py.compile(sourcecode, 'norpy_hatchery', extra_args,
+            extension='.f90')
+
+        os.chdir('../')
+
+
+def build(ctx):
+
+    flags = ctx.env.FCFLAGS + ['-fPIC']
+    ctx(features=['fc', 'fcstlib'], source=['lib_norpy.f90'], target='norpy', fcflags=flags)
+
+    ctx.add_to_group(CreateF2pyInterfaces(env=ctx.env))

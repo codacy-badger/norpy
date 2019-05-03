@@ -9,38 +9,6 @@ from numpy import f2py
 import pandas as pd
 import numpy as np
 
-# If you need to compile the F2PY interface again.
-FLAGS_DEBUG = []
-FLAGS_DEBUG += ['-O', '-Wall', '-Wline-truncation', '-Wsurprising', '-Waliasing']
-FLAGS_DEBUG += ['-Wunused-parameter', '-fwhole-file', '-fcheck=all']
-FLAGS_DEBUG += ['-fbacktrace', '-fmax-errors=1', '-ffree-line-length-0']
-FLAGS_DEBUG += ['-cpp', '-Wcharacter-truncation', '-Wimplicit-interface']
-
-
-if True:
-
-    cmd = "git clean -df"
-    os.system(cmd)
-
-    # We need to process in two steps. First we compile a library and then use it in a special
-    # F2PY interface for Python.
-    os.chdir("norpy/solve")
-
-    cmd = "gfortran -c -fPIC lib_norpy.f90"
-    os.system(cmd)
-
-    cmd = "ar crs libnorpy.a lib_norpy.o lib_norpy.mod"
-    os.system(cmd)
-
-    args = ""
-    args += "--f90exec=gfortran --f90flags=" + '"' + " ".join(FLAGS_DEBUG) + '" '
-    args += "-L. -lnorpy -llapack "
-
-    solve = open("norpy_hatchery.f90", "rb").read()
-    f2py.compile(solve, "norpy_hatchery", args, extension=".f90")
-
-    os.chdir('../../')
-
 
 from norpy.solve.norpy_hatchery import f2py_calculate_immediate_rewards
 from norpy.solve.norpy_hatchery import f2py_create_state_space
