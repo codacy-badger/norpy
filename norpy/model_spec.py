@@ -151,7 +151,6 @@ def get_random_model_specification(constr=None):
             The keys correspond to the field that is set to the value
             field.
 
-            {'periods': 4, 'rho': 0.4}
     """
 
     def process_constraints(constr):
@@ -207,11 +206,7 @@ def get_random_model_specification(constr=None):
         size=init_dict["num_types"] * 3
     ).reshape((init_dict["num_types"], 3))
     init_dict["shocks_cov"] = invwishart.rvs(df=3, scale=np.identity(3))
-    args = (
-        np.zeros(3),
-        init_dict["shocks_cov"],
-        (init_dict["num_periods"], init_dict["num_draws_emax"]),
-    )
+    
 
     process_constraints(constr)
 

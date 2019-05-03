@@ -13,7 +13,8 @@ class CreateF2pyInterfaces(Task):
 
         extra_args = '--f90flags="-ffree-line-length-0" -I../.bld ' \
                      '-L../.bld/solve -lnorpy ' \
-                     '-llapack'
+                     '-llapack' 
+                     
 
         with open('norpy_hatchery.f90', 'rb') as sourcefile:
             sourcecode = sourcefile.read()

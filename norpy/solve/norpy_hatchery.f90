@@ -208,6 +208,7 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
             ! Calculate the systematic part of OCCUPATION A and OCCUPATION B rewards. these are defined in a general sense, where not only wages matter.
             ! Only occupation a now will give a REAL instead of an ARRAY
             wages = calculate_wages_systematic(covariates, coeffs_work, type_spec_shifts)
+            WRITE(*,*) rewards_general
             rewards(1) = wages + rewards_general
 	    	
             ! Calculate systematic part of schooling utility

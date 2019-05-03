@@ -63,11 +63,11 @@ from norpy.solve.norpy_hatchery import f2py_create_state_space
 from norpy.solve.norpy_hatchery import f2py_backward_induction
 from norpy.solve.norpy_hatchery import f2py_simulate
 
-from norpy.tests.auxiliary import DATA_FORMATS_SIM
-from norpy.tests.auxiliary import DATA_LABELS_SIM
-from norpy.tests.auxiliary import MISSING_FLOAT
-from norpy.tests.auxiliary import MISSING_INT
-from norpy.tests.auxiliary import HUGE_FLOAT
+from norpy.simulate.simulate_auxiliary import DATA_FORMATS_SIM
+from norpy.simulate.simulate_auxiliary import DATA_LABELS_SIM
+from norpy.simulate.simulate_auxiliary import MISSING_FLOAT
+from norpy.simulate.simulate_auxiliary import MISSING_INT
+from norpy.simulate.simulate_auxiliary import HUGE_FLOAT
 
 np.random.seed(123)
 
@@ -105,12 +105,14 @@ for _ in range(10):
         mapping_state_idx,
         max_states_period,
     ]
+    print(states_number_period)
 
     args = (np.zeros(3), shocks_cov, (num_periods, num_draws_emax))
     periods_draws_emax = np.random.multivariate_normal(*args)
     periods_draws_emax[:, :, :2] = np.clip(
         np.exp(periods_draws_emax[:, :, :2]), 0.0, HUGE_FLOAT
     )
+    
 
     args = list()
 
@@ -131,7 +133,7 @@ for _ in range(10):
     args += [num_periods, max_states_period, periods_draws_emax, num_draws_emax]
     args += [periods_rewards_systematic, edu_spec_max, delta]
     args += [coeffs_common, coeffs_work]
-
+    
     periods_emax = f2py_backward_induction(*args)
 
     # We need to simulate the initial conditions of the individuals for the simulation. Here we
@@ -168,13 +170,13 @@ for _ in range(10):
     dat = f2py_simulate(*args)
 
     # We can now set up an easily accessible data frame for exploratory testing.
-    print("is dieses zeug des problem ?")
+    
     df = (
         pd.DataFrame(data=dat, columns=DATA_LABELS_SIM)
         .astype(DATA_FORMATS_SIM)
         .sort_values(["Identifier", "Period"])
     )
-    print("eha ned")
+    
     df.replace([MISSING_FLOAT, MISSING_INT], np.nan)
     df.to_pickle("data.norpy.pkl")
 

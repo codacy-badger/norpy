@@ -37,7 +37,7 @@ def create_state_space(model_object, boolean=False):
     states_all, states_number_period, mapping_state_idx, max_states_period = f2py_create_state_space(
         *args
     )
-    states_all = states_all[:, : max(states_number_period), :]
+    
     state_space_info = {
         "states_all": states_all,
         "states_number_period": states_number_period,
