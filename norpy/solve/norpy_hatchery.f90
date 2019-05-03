@@ -186,11 +186,12 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
     !-----------------------------------------------------------------------------------------------
 
     periods_rewards_systematic = MISSING_FLOAT
+    
 		
     ! Calculate systematic instantaneous rewards
     DO period = num_periods, 1, -1
 	DO k=1, (states_number_period(period))
-	    	
+	    WRITE(*,*) k	
             ! Distribute state space
             exp = states_all(period, k, 1)
             edu = states_all(period, k, 2)
