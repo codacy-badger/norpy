@@ -21,7 +21,7 @@ from norpy.simulate.simulate_auxiliary import MISSING_FLOAT
 from norpy.simulate.simulate_auxiliary import MISSING_INT
 from norpy.simulate.simulate_auxiliary import HUGE_FLOAT
 from norpy.simulate.simulate_auxiliary import LARGE_FLOAT
-from norpy.simulate.simulate_auxiliary import REFERENCE_SEED
+
 
 
 
@@ -69,20 +69,22 @@ def return_immediate_rewards(model_object, state_space_info):
     return periods_rewards_systematic
 
 
-def return_simulated_shocks(model_object,seed=REFERENCE_SEED, simulation=False):
-    np.random.seed(seed)
+def return_simulated_shocks(model_object, simulation=False):
+
     if simulation == True:
         args = (
             np.zeros(3),
             model_object.shocks_cov,
             (model_object.num_periods, model_object.num_agents_sim),
         )
+        np.random.seed(model_object.seed_sim)
     else:
         args = (
             np.zeros(3),
             model_object.shocks_cov,
             (model_object.num_periods, model_object.num_draws_emax),
         )
+        np.random.seed(model_object.seed_emax)
 
     periods_draws_emax = np.random.multivariate_normal(*args)
     periods_draws_emax[:, :, :2] = np.clip(
@@ -124,7 +126,7 @@ def backward_induction_procedure(
     return periods_emax
 
 
-def simulate(model_object,seed = REFERENCE_SEED):
+def simulate(model_object):
     """
     Simulate the full model and return relevant results:
     All intermediate results are saved as local variables and all inputs are stored in a
@@ -135,17 +137,17 @@ def simulate(model_object,seed = REFERENCE_SEED):
 
 
     """
-    np.random.seed(seed)
+
     state_space_info = create_state_space(model_object)
     periods_rewards_systematic = return_immediate_rewards(
         model_object, state_space_info
     )
-    periods_draws_emax = return_simulated_shocks(model_object,seed)
-    periods_draws_sims = return_simulated_shocks(model_object,seed,True)
+    periods_draws_emax = return_simulated_shocks(model_object)
+    periods_draws_sims = return_simulated_shocks(model_object,True)
     periods_emax = backward_induction_procedure(
         model_object, state_space_info, periods_rewards_systematic, periods_draws_emax
     )
-
+    np.random.seed(model_object.seed_sim)
     sample_lagged_start = np.random.choice([3, 3], p=[0.1, 0.9], size=model_object.num_agents_sim)
     sample_edu_start = np.random.choice(model_object.edu_spec_start, size=model_object.num_agents_sim)
     sample_types = np.random.choice(range(model_object.num_types), size=model_object.num_agents_sim)

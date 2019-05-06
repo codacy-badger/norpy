@@ -191,7 +191,7 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
     ! Calculate systematic instantaneous rewards
     DO period = num_periods, 1, -1
 	DO k=1, (states_number_period(period))
-	    WRITE(*,*) k	
+	    	
             ! Distribute state space
             exp = states_all(period, k, 1)
             edu = states_all(period, k, 2)
@@ -208,7 +208,7 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
             ! Calculate the systematic part of OCCUPATION A and OCCUPATION B rewards. these are defined in a general sense, where not only wages matter.
             ! Only occupation a now will give a REAL instead of an ARRAY
             wages = calculate_wages_systematic(covariates, coeffs_work, type_spec_shifts)
-            WRITE(*,*) rewards_general
+           
             rewards(1) = wages + rewards_general
 	    	
             ! Calculate systematic part of schooling utility
@@ -232,7 +232,7 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
             ! Now we add the type-specific deviation.
             DO i = 2, 3
                 rewards(i) = rewards(i) + type_spec_shifts(type_ , i - 1)
-                !WRITE(*,*) type_spec_shifts(type,1)
+                
             END DO
 
             ! We can now also added the common component of rewards.

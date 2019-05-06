@@ -51,6 +51,8 @@ class ModelSpec(typing.NamedTuple):
     coeffs_edu: np.ndarray
     num_agents_sim: int
     delta: float
+    seed_sim: int
+    seed_emax: int
     # We make some of the private methods of the base class
     # public.
     def as_dict(self):
@@ -86,6 +88,8 @@ class ModelSpec(typing.NamedTuple):
                 "num_edu_start",
                 "edu_spec_max",
                 "num_agents_sim",
+                "seed_sim",
+                "seed_emax"
             ]:
                 assert isinstance(attr, int)
                 assert attr > 0
@@ -179,7 +183,9 @@ def get_random_model_specification(constr=None):
             "coeffs_edu",
             "coeffs_work",
             "type_spec_shifts",
-            "shocks_cov"
+            "shocks_cov",
+            "seed_sim",
+            "seed_emax"
 
         ]
         for x in list_of_var:
@@ -206,6 +212,8 @@ def get_random_model_specification(constr=None):
         size=init_dict["num_types"] * 3
     ).reshape((init_dict["num_types"], 3))
     init_dict["shocks_cov"] = invwishart.rvs(df=3, scale=np.identity(3))
+    init_dict["seed_sim"] = np.random.randint(1,10000)
+    init_dict["seed_emax"] = np.random.randint(1, 10000)
     
 
     process_constraints(constr)
