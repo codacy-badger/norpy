@@ -11,6 +11,9 @@ install:
   - conda env create -f environment.yml
   - source activate norpy
 
+before_script:
+  - export PYTHONPATH=$PYTHONPATH:$(pwd)
+
 script:
     - py.test
 
