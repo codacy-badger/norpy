@@ -13,14 +13,14 @@ import pytest
 import math
 import pytest
 
-from norpy.simulate.simulate import (
+from norpy import (
     create_state_space,
     return_immediate_rewards,
     backward_induction_procedure,
     simulate,
     return_simulated_shocks
 )
-from norpy.model_spec import get_random_model_specification, get_model_obj
+from norpy import get_random_model_specification, get_model_obj
 
 def random_model_object():
     model_object = get_model_obj(get_random_model_specification())
