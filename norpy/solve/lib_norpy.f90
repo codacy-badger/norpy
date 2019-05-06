@@ -27,7 +27,7 @@ MODULE lib_norpy
     REAL(our_dble), PARAMETER :: two_dble = 2.00_our_dble
 
     TYPE COVARIATES_DICT
- 
+
         INTEGER(our_int) :: is_return_not_high_school
         INTEGER(our_int) :: is_return_high_school
         INTEGER(our_int) :: not_exp_lagged
@@ -66,8 +66,9 @@ MODULE lib_norpy
         INTEGER(our_int), ALLOCATABLE :: start(:)
         INTEGER(our_int) :: max
 
-        REAL(our_dble), ALLOCATABLE :: lagged(:)
-        REAL(our_dble), ALLOCATABLE :: share(:)
+        ! TODO: Several variables are not used anymore due to the improved setup of
+        ! handling all randomness in PYTHON. Please check all derived types for This
+        ! as the compiler will not tell us.
 
     END TYPE
 
@@ -78,10 +79,10 @@ CONTAINS
     FUNCTION calculate_wages_systematic(covariates,coeffs_work, type_shifts) RESULT(wages)
 
         !/* dummy arguments        */
-	REAL(our_dble) :: wages 
+	REAL(our_dble) :: wages
         REAL(our_dble), INTENT(IN) :: type_shifts(:, :)
         REAL(our_dble), INTENT(IN) :: coeffs_work(13)
-        
+
         TYPE(COVARIATES_DICT), INTENT(IN) :: covariates
 
         !/* local variables        */
@@ -89,7 +90,7 @@ CONTAINS
         INTEGER(our_int) :: i
 
         REAL(our_dble) :: covars_wages(10)
-        
+
         !-------------------------------------------------------------------------------------------
         ! Algorithm
         !-------------------------------------------------------------------------------------------
@@ -104,17 +105,17 @@ CONTAINS
         covars_wages(7) = covariates%period - one_dble
         covars_wages(8) = covariates%is_minor
         covars_wages(9:) = (/ covariates%any_exp, covariates%work_lagged/)
-        
+
         wages = EXP(DOT_PRODUCT(covars_wages, coeffs_work(:10)))
         wages = wages * EXP(type_shifts(covariates%type_,1))
-        
+
     END FUNCTION
     !***********************************************************************************************
     !***********************************************************************************************
     FUNCTION calculate_rewards_common(covariates, coeffs_common) RESULT(rewards_common)
 
         !/* dummy arguments       */
-	
+
 	REAL(our_dble) :: rewards_common
 
         TYPE(COVARIATES_DICT), INTENT(IN) :: covariates
@@ -142,11 +143,11 @@ CONTAINS
         REAL(our_dble) :: rewards_general
 
         REAL(our_dble), INTENT(IN) :: coeffs_general(3)
-        
+
         TYPE(COVARIATES_DICT), INTENT(IN) :: covariates
 
         !/* local variables       */
-         
+
         REAL(our_dble) :: covars_general(3)
 
         !-------------------------------------------------------------------------------------------
@@ -156,7 +157,7 @@ CONTAINS
         covars_general = (/ one_int, covariates%not_exp_lagged, covariates%not_any_exp /)
         rewards_general = DOT_PRODUCT(covars_general, coeffs_general)
 
-        
+
 
     END FUNCTION
     !***********************************************************************************************
@@ -194,7 +195,7 @@ CONTAINS
         INTEGER(our_int), INTENT(IN) :: period
         INTEGER(our_int), INTENT(IN) :: type_
         INTEGER(our_int), INTENT(IN) :: exp
-        
+
         INTEGER(our_int), INTENT(IN) :: edu
 
         !/* local variables        */
@@ -245,7 +246,7 @@ CONTAINS
             num_draws_emax, num_periods) RESULT(emax)
 
         !/* external objects    */
-        
+
         REAL(our_dble) :: emax
 
         TYPE(OPTIMPARAS_DICT), INTENT(IN) :: optim_paras
@@ -283,7 +284,7 @@ CONTAINS
             draws = draws_emax_risk(i, :)
 
             ! Calculate total value
-            
+
             CALL get_total_values(total_values, rewards_ex_post, period, num_periods, &
                     rewards_systematic, draws, mapping_state_idx, periods_emax, k, states_all, &
                     optim_paras, edu_spec)
@@ -330,11 +331,11 @@ CONTAINS
         !-------------------------------------------------------------------------------
         ! Algorithm
         !-------------------------------------------------------------------------------
-        
+
         covariates = construct_covariates(exp, edu, choice_lagged, MISSING_INT, MISSING_INT)
 	covars_general = (/ one_int, covariates%not_exp_lagged, covariates%not_any_exp /)
         general = DOT_PRODUCT(covars_general, optim_paras%coeffs_work(11:13))
-        
+
         ! Second we do the same with the common component.
         covars_common = (/ covariates%hs_graduate, covariates%co_graduate /)
         rewards_common = DOT_PRODUCT(covars_common,optim_paras%coeffs_common)
@@ -345,7 +346,7 @@ CONTAINS
     !***********************************************************************************************
     SUBROUTINE get_total_values(total_values, rewards_ex_post, period, num_periods, &
             rewards_systematic, draws, mapping_state_idx, periods_emax, k, states_all, &
-            optim_paras, edu_spec)		
+            optim_paras, edu_spec)
 
         !/* external objects        */
 
@@ -375,36 +376,36 @@ CONTAINS
         INTEGER(our_int) :: exp
 	INTEGER(our_int) :: edu
         INTEGER(our_int) :: i
-        
+
         !------------------------------------------------------------------------------
         ! Algorithm
         !------------------------------------------------------------------------------
-        
+
         ! We need to back out the wages from the total systematic rewards to working in the labor market to add the shock properly.
         exp = states_all(period + 1, k + 1, 1)
 	edu = states_all(period + 1, k + 1, 2)
         choice_lagged = states_all(period + 1, k + 1, 3)
         wages_systematic = back_out_systematic_wages(rewards_systematic, exp, edu, choice_lagged, optim_paras)
-        
+
         ! Initialize containers
         rewards_ex_post = zero_dble
 
         ! Calculate ex post rewards
          total_increment = rewards_systematic(1) - wages_systematic
          rewards_ex_post(1) = wages_systematic * draws(1) + total_increment
-         
+
         Do i = 2, 3
             rewards_ex_post(i) = rewards_systematic(i) + draws(i)
         END DO
-        
+
 	! Get future values
-        
+
         IF (period .NE. (num_periods - one_int)) THEN
             emaxs = get_emaxs( mapping_state_idx, period, periods_emax, k, states_all, edu_spec)
         ELSE
             emaxs = zero_dble
         END IF
-        
+
         ! Calculate total utilities
         total_values = rewards_ex_post + optim_paras%delta(1) * emaxs
 
