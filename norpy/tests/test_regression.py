@@ -7,9 +7,9 @@ import sys
 import numpy as np
 #import pytest
 
-from norpy.simulate.simulate import simulate
-from norpy.norpy_config import TEST_RESOURCES_DIR
-from norpy.model_spec import get_model_obj, get_random_model_specification
+from norpy import simulate
+from norpy import TEST_RESOURCES_DIR
+from norpy import get_model_obj, get_random_model_specification
 
 
 def test1():
