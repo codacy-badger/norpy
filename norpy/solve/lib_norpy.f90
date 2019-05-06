@@ -62,18 +62,8 @@ MODULE lib_norpy
         REAL(our_dble) :: delta(1)
 
         ! TODO: We want to align the naming convention with our model object
-        ! in PYTHON.
+        ! in PYTHON. In this case, maybe edu_max in both is enough?
         INTEGER(our_int)  :: edu_spec_max
-
-    END TYPE
-
-    TYPE EDU_DICT
-
-        INTEGER(our_int) :: max
-
-        ! TODO: Several variables are not used anymore due to the improved setup of
-        ! handling all randomness in PYTHON. Please check all derived types for This
-        ! as the compiler will not tell us.
 
     END TYPE
 
@@ -81,12 +71,11 @@ CONTAINS
 
     !***********************************************************************************************
     !***********************************************************************************************
-    FUNCTION calculate_wages_systematic(covariates,coeffs_work, type_shifts) RESULT(wages)
+    FUNCTION calculate_wages_systematic(covariates, model_spec) RESULT(wages)
 
         !/* dummy arguments        */
 	REAL(our_dble) :: wages
-        REAL(our_dble), INTENT(IN) :: type_shifts(:, :)
-        REAL(our_dble), INTENT(IN) :: coeffs_work(13)
+      TYPE(MODEL_SPECIFICATION), INTENT(IN) :: model_spec
 
         TYPE(COVARIATES_DICT), INTENT(IN) :: covariates
 
@@ -111,13 +100,13 @@ CONTAINS
         covars_wages(8) = covariates%is_minor
         covars_wages(9:) = (/ covariates%any_exp, covariates%work_lagged/)
 
-        wages = EXP(DOT_PRODUCT(covars_wages, coeffs_work(:10)))
-        wages = wages * EXP(type_shifts(covariates%type_,1))
+        wages = EXP(DOT_PRODUCT(covars_wages, model_spec%coeffs_work(:10)))
+        wages = wages * EXP(model_spec%type_shifts(covariates%type_, 1))
 
     END FUNCTION
     !***********************************************************************************************
     !***********************************************************************************************
-    FUNCTION calculate_rewards_common(covariates, coeffs_common) RESULT(rewards_common)
+    FUNCTION calculate_rewards_common(covariates, model_spec) RESULT(rewards_common)
 
         !/* dummy arguments       */
 
@@ -125,7 +114,7 @@ CONTAINS
 
         TYPE(COVARIATES_DICT), INTENT(IN) :: covariates
 
-        REAL(our_dble), INTENT(IN) :: coeffs_common(2)
+        TYPE(MODEL_SPECIFICATION), INTENT(IN) :: model_spec
 
         !/* local variables        */
 
@@ -136,7 +125,7 @@ CONTAINS
         !------------------------------------------------------------------------------
 
         covars_common = (/ covariates%hs_graduate, covariates%co_graduate /)
-        rewards_common = DOT_PRODUCT(coeffs_common, covars_common)
+        rewards_common = DOT_PRODUCT(model_spec%coeffs_common, covars_common)
 
     END FUNCTION
     !***********************************************************************************************
@@ -247,7 +236,7 @@ CONTAINS
     !***********************************************************************************************
     !***********************************************************************************************
     FUNCTION construct_emax_risk(period, k, draws_emax_risk, rewards_systematic, &
-            periods_emax, states_all, mapping_state_idx, edu_spec, model_spec, &
+            periods_emax, states_all, mapping_state_idx, model_spec, &
             num_draws_emax, num_periods) RESULT(emax)
 
         !/* external objects    */
@@ -255,7 +244,6 @@ CONTAINS
         REAL(our_dble) :: emax
 
         TYPE(MODEL_SPECIFICATION), INTENT(IN) :: model_spec
-        TYPE(EDU_DICT), INTENT(IN) :: edu_spec
 
         INTEGER(our_int), INTENT(IN) :: mapping_state_idx(:, :, :, :, :)
         INTEGER(our_int), INTENT(IN) :: states_all(:, :, :)
@@ -292,7 +280,7 @@ CONTAINS
 
             CALL get_total_values(total_values, rewards_ex_post, period, num_periods, &
                     rewards_systematic, draws, mapping_state_idx, periods_emax, k, states_all, &
-                    model_spec, edu_spec)
+                    model_spec)
 
             ! Determine optimal choice
             maximum = MAXVAL(total_values)
@@ -351,7 +339,7 @@ CONTAINS
     !***********************************************************************************************
     SUBROUTINE get_total_values(total_values, rewards_ex_post, period, num_periods, &
             rewards_systematic, draws, mapping_state_idx, periods_emax, k, states_all, &
-            model_spec, edu_spec)
+            model_spec)
 
         !/* external objects        */
 
@@ -359,7 +347,6 @@ CONTAINS
         REAL(our_dble), INTENT(OUT) :: total_values(3)
 
         TYPE(MODEL_SPECIFICATION), INTENT(IN) :: model_spec
-        TYPE(EDU_DICT), INTENT(IN) :: edu_spec
 
         INTEGER(our_int), INTENT(IN) :: num_periods
         INTEGER(our_int), INTENT(IN) :: mapping_state_idx(:, :, :, :, :)
@@ -406,7 +393,7 @@ CONTAINS
 	! Get future values
 
         IF (period .NE. (num_periods - one_int)) THEN
-            emaxs = get_emaxs( mapping_state_idx, period, periods_emax, k, states_all, edu_spec)
+            emaxs = get_emaxs( mapping_state_idx, period, periods_emax, k, states_all, model_spec)
         ELSE
             emaxs = zero_dble
         END IF
@@ -415,18 +402,18 @@ CONTAINS
         total_values = rewards_ex_post + model_spec%delta(1) * emaxs
 
         ! This is required to ensure that the agent does not choose any inadmissible states. If the state is inadmissible emaxs takes value zero.
-        IF (states_all(period + 1, k + 1, 3) >= edu_spec%max) THEN
+        IF (states_all(period + 1, k + 1, 3) >= model_spec%edu_spec_max) THEN
             total_values(3) = total_values(3) + INADMISSIBILITY_PENALTY
         END IF
 
     END SUBROUTINE
     !***********************************************************************************************
     !***********************************************************************************************
-    FUNCTION get_emaxs(mapping_state_idx, period, periods_emax, k, states_all, edu_spec) RESULT(emaxs)
+    FUNCTION get_emaxs(mapping_state_idx, period, periods_emax, k, states_all, model_spec) RESULT(emaxs)
 
 	!/* external objects        */
 
-	TYPE(EDU_DICT), INTENT(IN) :: edu_spec
+	TYPE(MODEL_SPECIFICATION), INTENT(IN) :: model_spec
 
 	REAL(our_dble) :: emaxs(3)
 
@@ -458,7 +445,7 @@ CONTAINS
 	emaxs(1) = periods_emax(period + 1 + 1, future_idx + 1)
 
 	! Increasing schooling. Note that adding an additional year of schooling is only possible for those that have strictly less than the maximum level of additional education allowed.
-	IF(edu .GE. edu_spec%max) THEN
+	IF(edu .GE. model_spec%edu_spec_max) THEN
 	    emaxs(2) = zero_dble
 	ELSE
 	    future_idx = mapping_state_idx(period + 1 + 1, exp + 1, edu + 1 + 1, 2, type_)
