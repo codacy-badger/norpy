@@ -106,7 +106,7 @@ CONTAINS
         covars_wages(9:) = (/ covariates%any_exp, covariates%work_lagged/)
         
         wages = EXP(DOT_PRODUCT(covars_wages, coeffs_work(:10)))
-        wages = wages * EXP(type_shifts(covariates%type_ + 1,1))
+        wages = wages * EXP(type_shifts(covariates%type_,1))
         
     END FUNCTION
     !***********************************************************************************************
