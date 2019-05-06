@@ -49,21 +49,26 @@ MODULE lib_norpy
 
     END TYPE
 
-    TYPE OPTIMPARAS_DICT
+    TYPE MODEL_SPECIFICATION
 
+        ! TODO: Note that some attributes need to be allocated first as their
+        ! shape is not known a priori. For example, the one below depends on the
+        ! number of types.
         REAL(our_dble), ALLOCATABLE :: type_shifts(:, :)
-        REAL(our_dble), ALLOCATABLE :: typeshares(:)
         REAL(our_dble) :: coeffs_common(2)
         REAL(our_dble) :: coeffs_home(3)
         REAL(our_dble) :: coeffs_edu(7)
         REAL(our_dble) :: coeffs_work(13)
         REAL(our_dble) :: delta(1)
 
+        ! TODO: We want to align the naming convention with our model object
+        ! in PYTHON.
+        INTEGER(our_int)  :: edu_spec_max
+
     END TYPE
 
     TYPE EDU_DICT
 
-        INTEGER(our_int), ALLOCATABLE :: start(:)
         INTEGER(our_int) :: max
 
         ! TODO: Several variables are not used anymore due to the improved setup of
@@ -242,14 +247,14 @@ CONTAINS
     !***********************************************************************************************
     !***********************************************************************************************
     FUNCTION construct_emax_risk(period, k, draws_emax_risk, rewards_systematic, &
-            periods_emax, states_all, mapping_state_idx, edu_spec, optim_paras, &
+            periods_emax, states_all, mapping_state_idx, edu_spec, model_spec, &
             num_draws_emax, num_periods) RESULT(emax)
 
         !/* external objects    */
 
         REAL(our_dble) :: emax
 
-        TYPE(OPTIMPARAS_DICT), INTENT(IN) :: optim_paras
+        TYPE(MODEL_SPECIFICATION), INTENT(IN) :: model_spec
         TYPE(EDU_DICT), INTENT(IN) :: edu_spec
 
         INTEGER(our_int), INTENT(IN) :: mapping_state_idx(:, :, :, :, :)
@@ -287,7 +292,7 @@ CONTAINS
 
             CALL get_total_values(total_values, rewards_ex_post, period, num_periods, &
                     rewards_systematic, draws, mapping_state_idx, periods_emax, k, states_all, &
-                    optim_paras, edu_spec)
+                    model_spec, edu_spec)
 
             ! Determine optimal choice
             maximum = MAXVAL(total_values)
@@ -304,13 +309,13 @@ CONTAINS
     !***********************************************************************************************
     !***********************************************************************************************
     FUNCTION back_out_systematic_wages(rewards_systematic, exp, edu, choice_lagged, &
-            optim_paras) RESULT(wages_systematic)
+            model_spec) RESULT(wages_systematic)
 
         !/* external objects        */
 
         REAL(our_dble) :: wages_systematic
 
-        TYPE(OPTIMPARAS_DICT), INTENT(IN) :: optim_paras
+        TYPE(MODEL_SPECIFICATION), INTENT(IN) :: model_spec
 
         INTEGER(our_int), INTENT(IN) :: choice_lagged
         INTEGER(our_int), INTENT(IN) :: exp
@@ -334,11 +339,11 @@ CONTAINS
 
         covariates = construct_covariates(exp, edu, choice_lagged, MISSING_INT, MISSING_INT)
 	covars_general = (/ one_int, covariates%not_exp_lagged, covariates%not_any_exp /)
-        general = DOT_PRODUCT(covars_general, optim_paras%coeffs_work(11:13))
+        general = DOT_PRODUCT(covars_general, model_spec%coeffs_work(11:13))
 
         ! Second we do the same with the common component.
         covars_common = (/ covariates%hs_graduate, covariates%co_graduate /)
-        rewards_common = DOT_PRODUCT(covars_common,optim_paras%coeffs_common)
+        rewards_common = DOT_PRODUCT(covars_common,model_spec%coeffs_common)
 	wages_systematic = rewards_systematic(1) - general - rewards_common
 
     END FUNCTION
@@ -346,14 +351,14 @@ CONTAINS
     !***********************************************************************************************
     SUBROUTINE get_total_values(total_values, rewards_ex_post, period, num_periods, &
             rewards_systematic, draws, mapping_state_idx, periods_emax, k, states_all, &
-            optim_paras, edu_spec)
+            model_spec, edu_spec)
 
         !/* external objects        */
 
         REAL(our_dble), INTENT(OUT) :: rewards_ex_post(3)
         REAL(our_dble), INTENT(OUT) :: total_values(3)
 
-        TYPE(OPTIMPARAS_DICT), INTENT(IN) :: optim_paras
+        TYPE(MODEL_SPECIFICATION), INTENT(IN) :: model_spec
         TYPE(EDU_DICT), INTENT(IN) :: edu_spec
 
         INTEGER(our_int), INTENT(IN) :: num_periods
@@ -385,7 +390,7 @@ CONTAINS
         exp = states_all(period + 1, k + 1, 1)
 	edu = states_all(period + 1, k + 1, 2)
         choice_lagged = states_all(period + 1, k + 1, 3)
-        wages_systematic = back_out_systematic_wages(rewards_systematic, exp, edu, choice_lagged, optim_paras)
+        wages_systematic = back_out_systematic_wages(rewards_systematic, exp, edu, choice_lagged, model_spec)
 
         ! Initialize containers
         rewards_ex_post = zero_dble
@@ -407,7 +412,7 @@ CONTAINS
         END IF
 
         ! Calculate total utilities
-        total_values = rewards_ex_post + optim_paras%delta(1) * emaxs
+        total_values = rewards_ex_post + model_spec%delta(1) * emaxs
 
         ! This is required to ensure that the agent does not choose any inadmissible states. If the state is inadmissible emaxs takes value zero.
         IF (states_all(period + 1, k + 1, 3) >= edu_spec%max) THEN
