@@ -13,10 +13,10 @@ install:
 
 before_script:
   - export PYTHONPATH=$PYTHONPATH:$(pwd)
-  - cd norpy; ./waf configure build --debug; cd ..
 
 script:
-    - py.test
+  - cd norpy; ./waf configure build --debug; cd ..
+  - py.test
 
 notifications:
   slack:
