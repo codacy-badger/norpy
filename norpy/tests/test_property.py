@@ -154,9 +154,6 @@ def input_output_size():
 
 
 def test_state_space_3(input_output_size):
-    assert input_output_size[0][input_output_size[1]] != np.array(
-        [-99, -99, -99, -99, -99]
-    )
     assert input_output_size[3].max() == input_output_size[2]
 
 
@@ -191,9 +188,9 @@ def input_output_dimension():
 
 
 def test_state_space_dimension(input_output_dimension):
-    assert (
+    np.testing.assert_array_almost_equal(
         input_output_dimension[2][input_output_dimension[3] - 1]
-        == input_output_dimension[4]
+        , input_output_dimension[4]
     )
 
 
@@ -255,13 +252,13 @@ def input_output_immediate_rewards_home():
 
 
 def test_immediate_rewards_home(input_output_immediate_rewards_home):
-    assert (
+    np.testing.assert_array_almost_equal (
         input_output_immediate_rewards_home[0][
             input_output_immediate_rewards_home[1] - 1,
             input_output_immediate_rewards_home[3],
             2,
         ]
-        == input_output_immediate_rewards_home[2]
+        , input_output_immediate_rewards_home[2]
     )
 
 
