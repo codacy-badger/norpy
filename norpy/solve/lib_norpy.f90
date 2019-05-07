@@ -54,16 +54,29 @@ MODULE lib_norpy
         ! TODO: Note that some attributes need to be allocated first as their
         ! shape is not known a priori. For example, the one below depends on the
         ! number of types.
+
         REAL(our_dble), ALLOCATABLE :: type_shifts(:, :)
         REAL(our_dble) :: coeffs_common(2)
         REAL(our_dble) :: coeffs_home(3)
         REAL(our_dble) :: coeffs_edu(7)
         REAL(our_dble) :: coeffs_work(13)
         REAL(our_dble) :: delta(1)
+        REAL(our_dble) :: shocks_cov(3)
+
+        
 
         ! TODO: We want to align the naming convention with our model object
         ! in PYTHON. In this case, maybe edu_max in both is enough?
-        INTEGER(our_int)  :: edu_spec_max
+        INTEGER(our_int)  :: edu_max
+        INTEGER(our_int)  :: num_types
+        INTEGER(our_int)  :: num_periods
+        INTEGER(our_int)  :: num_draws_emax
+        INTEGER(our_int)  :: num_edu_start 
+        INTEGER(our_int)  :: num_agents_sim
+        INTEGER(our_int)  :: seed_sim
+        INTEGER(our_int)  :: seed_emax 
+        INTEGER(our_int), ALLOCATABLE  :: edu_range_start(:)
+        
 
     END TYPE
 
@@ -236,8 +249,7 @@ CONTAINS
     !***********************************************************************************************
     !***********************************************************************************************
     FUNCTION construct_emax_risk(period, k, draws_emax_risk, rewards_systematic, &
-            periods_emax, states_all, mapping_state_idx, model_spec, &
-            num_draws_emax, num_periods) RESULT(emax)
+            periods_emax, states_all, mapping_state_idx, model_spec) RESULT(emax)
 
         !/* external objects    */
 
@@ -247,8 +259,8 @@ CONTAINS
 
         INTEGER(our_int), INTENT(IN) :: mapping_state_idx(:, :, :, :, :)
         INTEGER(our_int), INTENT(IN) :: states_all(:, :, :)
-        INTEGER(our_int), INTENT(IN) :: num_draws_emax
-        INTEGER(our_int), INTENT(IN) :: num_periods
+       
+
         INTEGER(our_int), INTENT(IN) :: period
         INTEGER(our_int), INTENT(IN) :: k
 
@@ -271,14 +283,14 @@ CONTAINS
 
         ! Iterate over Monte Carlo draws
         emax = zero_dble
-        DO i = 1, num_draws_emax
+        DO i = 1, model_spec%num_draws_emax
 
             ! Select draws for this draw
             draws = draws_emax_risk(i, :)
 
             ! Calculate total value
 
-            CALL get_total_values(total_values, rewards_ex_post, period, num_periods, &
+            CALL get_total_values(total_values, rewards_ex_post, period, &
                     rewards_systematic, draws, mapping_state_idx, periods_emax, k, states_all, &
                     model_spec)
 
@@ -291,7 +303,7 @@ CONTAINS
         END DO
 
         ! Scaling
-        emax = emax / num_draws_emax
+        emax = emax / model_spec%num_draws_emax
 
     END FUNCTION
     !***********************************************************************************************
@@ -337,7 +349,7 @@ CONTAINS
     END FUNCTION
     !***********************************************************************************************
     !***********************************************************************************************
-    SUBROUTINE get_total_values(total_values, rewards_ex_post, period, num_periods, &
+    SUBROUTINE get_total_values(total_values, rewards_ex_post, period, &
             rewards_systematic, draws, mapping_state_idx, periods_emax, k, states_all, &
             model_spec)
 
@@ -348,7 +360,7 @@ CONTAINS
 
         TYPE(MODEL_SPECIFICATION), INTENT(IN) :: model_spec
 
-        INTEGER(our_int), INTENT(IN) :: num_periods
+        
         INTEGER(our_int), INTENT(IN) :: mapping_state_idx(:, :, :, :, :)
         INTEGER(our_int), INTENT(IN) :: states_all(:, :, :)
         INTEGER(our_int), INTENT(IN) :: period
@@ -392,7 +404,7 @@ CONTAINS
 
 	! Get future values
 
-        IF (period .NE. (num_periods - one_int)) THEN
+        IF (period .NE. (model_spec%num_periods - one_int)) THEN
             emaxs = get_emaxs( mapping_state_idx, period, periods_emax, k, states_all, model_spec)
         ELSE
             emaxs = zero_dble
@@ -402,7 +414,7 @@ CONTAINS
         total_values = rewards_ex_post + model_spec%delta(1) * emaxs
 
         ! This is required to ensure that the agent does not choose any inadmissible states. If the state is inadmissible emaxs takes value zero.
-        IF (states_all(period + 1, k + 1, 3) >= model_spec%edu_spec_max) THEN
+        IF (states_all(period + 1, k + 1, 3) >= model_spec%edu_max) THEN
             total_values(3) = total_values(3) + INADMISSIBILITY_PENALTY
         END IF
 
@@ -445,7 +457,7 @@ CONTAINS
 	emaxs(1) = periods_emax(period + 1 + 1, future_idx + 1)
 
 	! Increasing schooling. Note that adding an additional year of schooling is only possible for those that have strictly less than the maximum level of additional education allowed.
-	IF(edu .GE. model_spec%edu_spec_max) THEN
+	IF(edu .GE. model_spec%edu_max) THEN
 	    emaxs(2) = zero_dble
 	ELSE
 	    future_idx = mapping_state_idx(period + 1 + 1, exp + 1, edu + 1 + 1, 2, type_)
@@ -459,5 +471,6 @@ CONTAINS
     END FUNCTION
 !***************************************************************************************************
 !***************************************************************************************************
+ 
 
 END MODULE

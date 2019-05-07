@@ -1,7 +1,7 @@
 !***************************************************************************************************
 !***************************************************************************************************
 SUBROUTINE f2py_create_state_space(states_all, states_number_period, mapping_state_idx, &
-        max_states_period, num_periods, num_types, edu_spec_start, edu_spec_max, min_idx_int,test_indication_optional)
+        max_states_period, num_periods, num_types, edu_range_start, edu_max, min_idx_int,test_indication_optional)
 
     USE lib_norpy
 
@@ -13,8 +13,8 @@ SUBROUTINE f2py_create_state_space(states_all, states_number_period, mapping_sta
     INTEGER, INTENT(OUT) :: states_number_period(num_periods)
     INTEGER, INTENT(OUT) :: max_states_period
 
-    INTEGER, INTENT(IN) :: edu_spec_start(:)
-    INTEGER, INTENT(IN) :: edu_spec_max
+    INTEGER, INTENT(IN) :: edu_range_start(:)
+    INTEGER, INTENT(IN) :: edu_max
     INTEGER, INTENT(IN) :: min_idx_int
     INTEGER, INTENT(IN) :: num_periods
     INTEGER, INTENT(IN) :: num_types
@@ -50,7 +50,7 @@ SUBROUTINE f2py_create_state_space(states_all, states_number_period, mapping_sta
     END IF
 
     ! Construct auxiliary objects
-    num_edu_start = SIZE(edu_spec_start)
+    num_edu_start = SIZE(edu_range_start)
 
     ! Initialize output
     states_number_period = MISSING_INT
@@ -68,7 +68,7 @@ SUBROUTINE f2py_create_state_space(states_all, states_number_period, mapping_sta
 
             ! Loop over all initial level of schooling
             DO j = 1, num_edu_start
-                edu_start = edu_spec_start(j)
+                edu_start = edu_range_start(j)
 
                 ! Loop over all admissible work experiences for Occupation A
                 DO exp = 0, num_periods
@@ -78,7 +78,7 @@ SUBROUTINE f2py_create_state_space(states_all, states_number_period, mapping_sta
                             IF (edu_add + exp  .GT. period - 1) CYCLE
 
                             ! Agent cannot attain more additional education than (EDU_MAX - EDU_START).
-                            IF (edu_add .GT. (edu_spec_max - edu_start)) CYCLE
+                            IF (edu_add .GT. (edu_max - edu_start)) CYCLE
                             DO choice_lagged = 1,3
                                 IF (period .GT. one_int) THEN
 
@@ -192,18 +192,25 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
 
     ! TODO: This is the placeholder for the more involved complete setup of the
     ! model object to come.
+        
+    model_spec%num_periods = num_periods
     model_spec%coeffs_common = coeffs_common
     model_spec%coeffs_work = coeffs_work
+    model_spec%coeffs_home = coeffs_home
+    model_spec%coeffs_edu = coeffs_edu
+    
+    
 
     ! TODO: A selected few need to be allocated first.
     ALLOCATE(model_spec%type_shifts(SIZE(type_spec_shifts, 1), 4))
     model_spec%type_shifts = type_spec_shifts
+       
 
     periods_rewards_systematic = MISSING_FLOAT
 
 
     ! Calculate systematic instantaneous rewards
-    DO period = num_periods, 1, -1
+    DO period = model_spec%num_periods, 1, -1
 	DO k=1, (states_number_period(period))
 
             ! Distribute state space
@@ -216,7 +223,7 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
             covariates = construct_covariates(exp, edu, choice_lagged, type_, period)
 
             ! Calculate common and general rewards component.
-            rewards_general = calculate_rewards_general(covariates, coeffs_work(11:13))
+            rewards_general = calculate_rewards_general(covariates, model_spec%coeffs_work(11:13))
             rewards_common = calculate_rewards_common(covariates, model_spec)
 
             ! Calculate the systematic part of OCCUPATION A and OCCUPATION B rewards. these are defined in a general sense, where not only wages matter.
@@ -234,14 +241,14 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
             covars_edu(6) = covariates%period - one_int
             covars_edu(7) = covariates%is_mandatory
 
-            rewards(2) = DOT_PRODUCT(covars_edu, coeffs_edu)
+            rewards(2) = DOT_PRODUCT(covars_edu, model_spec%coeffs_edu)
 
             ! Calculate systematic part of HOME
             covars_home(1) = one_int
             covars_home(2) = covariates%is_young_adult
             covars_home(3) = covariates%is_adult
 
-            rewards(3) = DOT_PRODUCT(covars_home, coeffs_home)
+            rewards(3) = DOT_PRODUCT(covars_home, model_spec%coeffs_home)
 
             ! Now we add the type-specific deviation.
             DO i = 2, 3
@@ -265,7 +272,7 @@ END SUBROUTINE
 !***************************************************************************************************
 SUBROUTINE f2py_backward_induction(periods_emax, states_all, states_number_period, &
         mapping_state_idx, num_periods, max_states_period, periods_draws_emax, num_draws_emax, &
-        periods_rewards_systematic, edu_spec_max, delta, coeffs_common, &
+        periods_rewards_systematic, edu_max, delta, coeffs_common, &
         coeffs_work)
 
     USE lib_norpy
@@ -287,7 +294,7 @@ SUBROUTINE f2py_backward_induction(periods_emax, states_all, states_number_perio
     INTEGER, INTENT(IN) :: states_all(:, :, :)
     INTEGER, INTENT(IN) :: max_states_period
     INTEGER, INTENT(IN) :: num_draws_emax
-    INTEGER, INTENT(IN) :: edu_spec_max
+    INTEGER, INTENT(IN) :: edu_max
     INTEGER, INTENT(IN) :: num_periods
 
     !/* internal objects*/
@@ -306,20 +313,21 @@ SUBROUTINE f2py_backward_induction(periods_emax, states_all, states_number_perio
     !-----------------------------------------------------------------------------------------------
 
     model_spec%coeffs_common = coeffs_common
-    model_spec%edu_spec_max = edu_spec_max
+    model_spec%edu_max = edu_max
     model_spec%coeffs_work = coeffs_work
     model_spec%delta = delta
+    model_spec%num_draws_emax = num_draws_emax 
+    model_spec%num_periods = num_periods
 
     periods_emax = MISSING_FLOAT
 
-    DO period = (num_periods - 1), 0, -1
+    DO period = (model_spec%num_periods - 1), 0, -1
         draws_emax_risk = periods_draws_emax(period + 1,:, :)
 
         DO k = 0, (states_number_period(period + 1) - 1)
             rewards_systematic = periods_rewards_systematic(period + 1, k + 1, :)
             emax = construct_emax_risk( period, k, draws_emax_risk, rewards_systematic, &
-                    periods_emax, states_all, mapping_state_idx, model_spec, &
-                    num_draws_emax, num_periods)
+                    periods_emax, states_all, mapping_state_idx, model_spec)
             periods_emax(period + 1, k + 1) = emax
 
         END DO
@@ -331,7 +339,7 @@ END SUBROUTINE
 !***************************************************************************************************
 SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, &
         periods_rewards_systematic, periods_emax, num_periods, num_agents_sim, &
-        periods_draws_sims, edu_spec_max, &
+        periods_draws_sims, edu_max, &
         coeffs_common, coeffs_work, delta, &
         sample_edu_start, sample_types, sample_lagged_start)
 
@@ -353,7 +361,7 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, &
     INTEGER, INTENT(IN) :: sample_lagged_start(:)
     INTEGER, INTENT(IN) :: sample_edu_start(:)
     INTEGER, INTENT(IN) :: sample_types(:)
-    INTEGER, INTENT(IN) :: edu_spec_max
+    INTEGER, INTENT(IN) :: edu_max
     INTEGER, INTENT(IN) :: num_periods
     INTEGER, INTENT(IN) :: mapping_state_idx(:, :,  :, :, :)
     INTEGER, INTENT(IN) :: states_all(:, :, :)
@@ -387,9 +395,12 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, &
 
     ! Construct derived types
     model_spec%coeffs_common = coeffs_common
-    model_spec%edu_spec_max = edu_spec_max
+    model_spec%edu_max = edu_max
     model_spec%coeffs_work = coeffs_work
     model_spec%delta = delta
+    model_spec%num_periods = num_periods
+    model_spec%num_agents_sim = num_agents_sim
+    
 
     data_sim = MISSING_FLOAT
 
@@ -406,7 +417,7 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, &
 	current_state(3) = sample_lagged_start(i + 1)
         current_state(4) = sample_types(i + 1)
 
-        DO period = 0, (num_periods - 1)
+        DO period = 0, (model_spec%num_periods - 1)
 
             ! Distribute state space
             exp = current_state(1)
@@ -426,13 +437,13 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, &
             draws = periods_draws_sims(period + 1, i + 1, :)
 
             ! Calculate total utilities
-            CALL get_total_values(total_values, rewards_ex_post, period, num_periods, &
+            CALL get_total_values(total_values, rewards_ex_post, period, &
                     rewards_systematic, draws, mapping_state_idx, periods_emax, k, states_all, &
                     model_spec)
 
             ! TODO: Is this still relevant as we do not have an interpolation routine set up?
             ! We need to ensure that no individual chooses an inadmissible state. This cannot be done directly in the get_total_values function as the penalty otherwise dominates the interpolation equation. The parameter INADMISSIBILITY_PENALTY is a compromise. It is only relevant in very constructed cases.
-            IF (edu >= model_spec%edu_spec_max) total_values(2) = -HUGE_FLOAT
+            IF (edu >= model_spec%edu_max) total_values(2) = -HUGE_FLOAT
 
             ! Determine and record optimal choice
             choice = MAXLOC(total_values, DIM = one_int)
