@@ -29,9 +29,9 @@ def create_state_space(model_object, boolean=False):
     args = (
         model_object.num_periods,
         model_object.num_types,
-        model_object.edu_spec_start,
-        model_object.edu_spec_max,
-        model_object.edu_spec_max + 1,
+        model_object.edu_range_start,
+        model_object.edu_max,
+        model_object.edu_max + 1,
         boolean,
     )
     states_all, states_number_period, mapping_state_idx, max_states_period = f2py_create_state_space(
@@ -119,7 +119,7 @@ def backward_induction_procedure(
         model_object.num_draws_emax,
     ]
 
-    args += [periods_rewards_systematic, model_object.edu_spec_max, model_object.delta]
+    args += [periods_rewards_systematic, model_object.edu_max, model_object.delta]
     args += [model_object.coeffs_common, model_object.coeffs_work]
 
     periods_emax = f2py_backward_induction(*args)
@@ -149,7 +149,7 @@ def simulate(model_object):
     )
     np.random.seed(model_object.seed_sim)
     sample_lagged_start = np.random.choice([3, 3], p=[0.1, 0.9], size=model_object.num_agents_sim)
-    sample_edu_start = np.random.choice(model_object.edu_spec_start, size=model_object.num_agents_sim)
+    sample_edu_start = np.random.choice(model_object.edu_range_start, size=model_object.num_agents_sim)
     sample_types = np.random.choice(range(model_object.num_types), size=model_object.num_agents_sim)
 
     args = [
@@ -160,7 +160,7 @@ def simulate(model_object):
         model_object.num_periods,
         model_object.num_agents_sim,
         periods_draws_sims,
-        model_object.edu_spec_max,
+        model_object.edu_max,
         model_object.coeffs_common,
         model_object.coeffs_work,
         model_object.delta,
