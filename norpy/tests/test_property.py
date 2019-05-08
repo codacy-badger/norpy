@@ -38,12 +38,12 @@ def input_output_state_space():
     period = np.random.randint(1, model_object.num_periods + 1)
     # Split up different cases
     type_ = np.random.randint(1, model_object.num_types + 1)
-    edu_start = model_object.edu_spec_start[
-        np.random.randint(len(model_object.edu_spec_start))
+    edu_start = model_object.edu_range_start[
+        np.random.randint(len(model_object.edu_range_start))
     ]
     exp_a = np.random.randint(period)
     edu_add = np.random.randint(
-        min(period - exp_a, model_object.edu_spec_max - edu_start)
+        min(period - exp_a, model_object.edu_max - edu_start)
     )
 
     if exp_a == 0:
@@ -94,8 +94,8 @@ def input_not_output_state_space():
     period = np.random.randint(1, model_object.num_periods + 1)
     # Split up different cases
     type_ = np.random.randint(1, model_object.num_types + 1)
-    edu_start = model_object.edu_spec_start[
-        np.random.randint(len(model_object.edu_spec_start))
+    edu_start = model_object.edu_range_start[
+        np.random.randint(len(model_object.edu_range_start))
     ]
     exp_a = np.random.randint(period)
     edu_add = np.random.randint(period - exp_a)
@@ -105,7 +105,7 @@ def input_not_output_state_space():
     elif edu_add == 0 and period >= 2:
         lagged_choice = 2
         edu_start = min(
-            model_object.edu_spec_start
+            model_object.edu_range_start
         )  # Here we have to be careful because only this case is not allowed
     else:
         lagged_choice = 300000

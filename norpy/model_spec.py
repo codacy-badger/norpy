@@ -41,8 +41,8 @@ class ModelSpec(typing.NamedTuple):
     num_types: int
     num_draws_emax: int
     num_edu_start: int
-    edu_spec_start: np.ndarray
-    edu_spec_max: int
+    edu_range_start: np.ndarray
+    edu_max: int
     shocks_cov: np.ndarray
     type_spec_shifts: np.ndarray
     coeffs_common: np.ndarray
@@ -86,7 +86,7 @@ class ModelSpec(typing.NamedTuple):
                 "num_types",
                 "num_draws_emax",
                 "num_edu_start",
-                "edu_spec_max",
+                "edu_max",
                 "num_agents_sim",
                 "seed_sim",
                 "seed_emax"
@@ -101,7 +101,7 @@ class ModelSpec(typing.NamedTuple):
                 "coeffs_home",
                 "coeffs_edu",
                 "type_spec_shifts",
-                "edu_spec_start",
+                "edu_range_start",
                 "shocks_cov"
             ]:
                 assert isinstance(attr, np.ndarray)
@@ -173,8 +173,8 @@ def get_random_model_specification(constr=None):
             "num_types",
             "num_periods",
             "num_agents_sim",
-            "edu_spec_max",
-            "edu_spec_start",
+            "edu_max",
+            "edu_range_start",
             "num_edu_start",
             "num_draws_emax",
             "delta",
@@ -196,8 +196,8 @@ def get_random_model_specification(constr=None):
     init_dict["num_types"] = np.random.randint(1, 5)
     init_dict["num_periods"] = np.random.randint(2, 10)
     init_dict["num_edu_start"] = np.random.randint(1, 4)
-    init_dict["edu_spec_max"] = np.random.randint(15, 25)
-    init_dict["edu_spec_start"] = np.random.choice(
+    init_dict["edu_max"] = np.random.randint(15, 25)
+    init_dict["edu_range_start"] = np.random.choice(
         range(1, 10), size=init_dict["num_edu_start"], replace=False
     )
     init_dict["num_agents_sim"] = np.random.randint(1, 50)
