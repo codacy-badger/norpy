@@ -1,7 +1,6 @@
 # Workflow
 
-1. Select issues to be addressed next and create Github Project
-2. Open Pull Request
+1. Select issues to be addressed next and create a Pull Request
 3. Tackle issues and run test battery before every commit
 4. Run PyCharm Code Inspection
 5. Run PR Testing before requesting a review
