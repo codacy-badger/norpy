@@ -24,9 +24,12 @@ before_script:
 
 script:
   - cd norpy; ./waf configure build --debug; cd ..
-  - py.test
+  - py.test --cov=norpy
   - python -c "import norpy; norpy.test()"
   - cd development/tests; python run_pr_testing.py; cd ../..
+
+after_success:
+  - codecov
 
 notifications:
   slack:
@@ -34,4 +37,3 @@ notifications:
       on_failure: never
 
   email: false
-
