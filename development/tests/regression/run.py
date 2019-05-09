@@ -6,7 +6,7 @@ import argparse
 from ose_utils.testing import create_regression_vault, check_regression_vault
 from norpy.model_spec import get_random_model_specification
 from norpy.tests.auxiliary import run_regression_test
-from norpy.norpy_config import PACKAGE_DIR
+from norpy.norpy_config import TEST_RESOURCES_DIR
 
 
 if __name__ == '__main__':
@@ -24,7 +24,7 @@ if __name__ == '__main__':
     if args.is_create:
         input_ = (run_regression_test, get_random_model_specification, args.num_tests)
         vault = create_regression_vault(*input_)
-        pkl.dump(vault, open(PACKAGE_DIR / 'tests/regression_vault.pkl', 'wb'))
+        pkl.dump(vault, open(TEST_RESOURCES_DIR / 'regression_vault.pkl', 'wb'))
 
-    vault = pkl.load(open(PACKAGE_DIR / 'tests/regression_vault.pkl', 'rb'))
+    vault = pkl.load(open(TEST_RESOURCES_DIR / '/regression_vault.pkl', 'rb'))
     check_regression_vault(run_regression_test, args.num_tests, vault)

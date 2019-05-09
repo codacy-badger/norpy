@@ -3,7 +3,7 @@ import pickle as pkl
 import numpy as np
 
 from norpy.tests.auxiliary import run_regression_test
-from norpy import TEST_RESOURCES_DIR
+from norpy.norpy_config import TEST_RESOURCES_DIR
 
 
 def test1():

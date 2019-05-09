@@ -25,6 +25,7 @@ before_script:
 script:
   - cd norpy; ./waf configure build --debug; cd ..
   - py.test
+  - python -c "import norpy; norpy.test()"
   - cd development/tests; python run_pr_testing.py; cd ../..
 
 notifications:
