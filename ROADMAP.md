@@ -1,17 +1,12 @@
 # ROADMAP
 
-We now want to work ahead and use norpy as soon as possible in as a replacement for the crude 
+We now want to work ahead and use norpy as soon as possible in as a replacement for the crude
 RESPY adjustments in the SMM and MLE estimation and then add the additional state variable there. We use SME and MLE wrappers to estimate the model.
 
-## Next steps
+## Next projects
 
-* Removing Occupation B from the backward procedure. Occ_B ha been removed from the state space 
-creation and from the function that calculates immediate rewards. The same procedure has to be performed on the
-backward induction and the function that calculates future rewards.
+* We want to clean up the FORTRAN codes a little mode by aligning the indices (k, period) with the standard indexing in FORTRAN starting at 1 and not in zero. In addition we want to finish our work on the model specification type. This project does only affect the FORTRAN files.
 
-* Improve Testing Infrastructure and create a unified and sound interface. All tests are on the 
-testing infrastructure at the moment. All components of norpy_hatchery are tested from different 
-perspectives in there. One thing that remains to be done is to clean the file up and avoid any 
-duplication. I want to clean up the testing setup in SOEPY and then we can work with Boryana to 
-implement the ideas here as well.
+* We need to clean up the property tests to follow the expected structure and increase test coverage.
 
+* We need to polish the PYTHON codes by addressing the flake8 complaint and set up black as a pre-commit hock.
