@@ -6,6 +6,7 @@ dependencies:
   - pandas
   - statsmodels
   - pytest
+  - pytest-cov
   - pytest-xdist
   - scipy
   - flake8
