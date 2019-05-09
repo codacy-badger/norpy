@@ -26,5 +26,5 @@ if __name__ == '__main__':
         vault = create_regression_vault(*input_)
         pkl.dump(vault, open(TEST_RESOURCES_DIR / 'regression_vault.pkl', 'wb'))
 
-    vault = pkl.load(open(TEST_RESOURCES_DIR / '/regression_vault.pkl', 'rb'))
+    vault = pkl.load(open(TEST_RESOURCES_DIR / 'regression_vault.pkl', 'rb'))
     check_regression_vault(run_regression_test, args.num_tests, vault)
