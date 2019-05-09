@@ -1,18 +1,20 @@
-"""This module contains the main class that allows for the SMM estimation."""
+"""
+Initial sketch of the adapter class.
+"""
 from functools import partial
 import os
 
 import pandas as pd
 import numpy as np
 
-from respy_smm.auxiliary_depreciation import shocks_spec_new_to_old
-from respy_smm.auxiliary_depreciation import respy_obj_from_new_init
+
 from respy_smm.auxiliary import is_valid_covariance_matrix
 from respy_smm.clsEstimation import EstimationCls
 from respy_smm.auxiliary import smm_sample_f2py, get_initial_conditions
 from respy_smm.clsLogging import logger_obj
 from respy_smm import HUGE_FLOAT
 from respy_smm import HUGE_INT
+from norpy.adapter.smm_auxiliary import OPTIM_PARAS
 
 from respy.python.shared.shared_auxiliary import replace_missing_values
 from respy.python.shared.shared_auxiliary import dist_class_attributes
@@ -30,7 +32,7 @@ class SimulationBasedEstimationCls(EstimationCls):
 
         super().__init__()
 
-        self.respy_base = get_model_obj(init_file)
+        self.model_obj = get_model_obj(init_file)
 
         # Creating a random data array also for the SMM routine allows to align a lot of the
         # designs across the two different estimation strategies.
@@ -44,44 +46,25 @@ class SimulationBasedEstimationCls(EstimationCls):
 
         self.set_derived_attributes()
 
-        # We always lock in an evaluation at the starting values and prepare for the evaluation
-        # of the criterion function.Was würden wir denn das set derived attributes machen sollte ?
-        #was soll uns denn x_free_econ bringen ??
-        self._prepare_evaluate()
-        self.evaluate(self.x_free_econ_start)
 
-    def evaluate(self, x_free_econ):
+    def evaluate(self, free_params):
         """This method evaluates the criterion function for a candidate parametrization proposed
         by the optimizer."""
-        assert np.all(np.isfinite(x_free_econ))
-        #free econ comes from the optimizer ? How does it look like
-        x_all_econ_current = self.construct_complete_parameters(x_free_econ)
-
+        self.model_obj = update_model_spec(free_params,self.model_obj,OPTIM_PARAS)
+        #Do we need this assert statement ?
+        assert np.all(np.isfinite(free_params))
+        #Here we check our covariance matrix ?
         if not is_valid_covariance_matrix(x_all_econ_current[43:53]):
             msg = 'invalid evaluation due to lack of proper covariance matrix'
             logger_obj.record_abort_eval(msg)
             return HUGE_FLOAT
 
-        # We now move into the territory of the code which will be simplified as we improve the
-        # RESPY implementation.
-        x_all_econ_eval_respy_old = x_all_econ_current.copy()
-        x_all_econ_eval_respy_old[43:53] = shocks_spec_new_to_old(x_all_econ_current[43:53])
-
-        self.respy_base.update_optim_paras(x_all_econ_eval_respy_old)
-        mat_smm = self.simulate_sample(self.respy_base)
-
-        df_smm = pd.DataFrame(replace_missing_values(mat_smm), columns=DATA_LABELS_SIM)
-        df_smm = df_smm.astype(DATA_FORMATS_SIM)
-        df_smm.set_index(['Identifier', 'Period'], drop=False, inplace=True)
-        moments_sim = self.get_moments(df_smm)
-
-        # TODO: Now we move all moments from a dictionary to an array. Is there a way to avoid
-        #  this transformation? This is not nicely done at this point, but I cannot think of a
-        #  nice way that requires a large OOP overhead. I want to make sure that the moments can
-        #  be provided in the simple form of a function.
+        array_sim = simulate(self.model_obj)
+        moments_sim = self.get_moments(array_sim)
         stats_obs, stats_sim = [], []
-        for group in self.moments_obs.keys():
-            for period in range(max(self.moments_obs[group].keys()) + 1):
+        #Check whether this goes through in our model !
+        for group in self.moments_sim.keys():
+            for period in range(max(self.moments_sim[group].keys()) + 1):
                 if period not in moments_sim[group].keys():
                     continue
                 if period not in self.moments_obs[group].keys():
@@ -100,43 +83,5 @@ class SimulationBasedEstimationCls(EstimationCls):
             logger_obj.record_abort_eval(msg)
             self.check_termination()
             fval = HUGE_FLOAT
-
-        self.wrapping_up_evaluation(x_all_econ_current, fval)
-        self._logging_smm(stats_obs, stats_sim)
-        self.check_termination()
-
         return fval
-
-    def _prepare_evaluate(self):
-        """This method runs a host of preparations for the evaluation of the criterion function
-        that are specific to the current RESPY implementation. So, major cleanup as we settle on
-        the revised interface."""
-        labels = list()
-        labels += ['num_procs', 'num_periods', 'is_debug', 'seed_emax', 'seed_sim']
-        labels += ['num_draws_emax', 'num_agents_sim', 'num_types', 'edu_spec', 'version']
-        labels += ['num_draws_prob', 'seed_prob']
-        num_procs, num_periods, is_debug, seed_emax, seed_sim, num_draws_emax, num_agents_sim, \
-        num_types, edu_spec, version, num_draws_prob, seed_prob = \
-            dist_class_attributes(self.respy_base, *labels)
-
-        periods_draws_emax = create_draws(num_periods, num_draws_emax, seed_emax, is_debug)
-        periods_draws_sims = create_draws(num_periods, num_agents_sim, seed_sim, is_debug)
-
-        disturbances = (periods_draws_emax, periods_draws_sims)
-
-        # We want to maintain a pure PYTHON version for testing purposes.
-        args = list()
-        args += [num_periods, num_types, edu_spec['start'], edu_spec['max'], edu_spec['max'] + 1]
-        state_space_info = respy_f2py.wrapper_create_state_space(*args)
-        if self.mpi_setup == MISSING_INT:
-            slavecomm = self.mpi_setup
-        else:
-            slavecomm = self.mpi_setup.py2f()
-            self.set_up_baseline(periods_draws_emax, None)
-
-        initial_conditions = get_initial_conditions(self.respy_base)
-
-        args = (smm_sample_f2py, state_space_info, initial_conditions, disturbances, slavecomm)
-        self.simulate_sample = partial(*args)
-
 
