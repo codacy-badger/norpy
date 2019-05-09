@@ -24,6 +24,7 @@ before_script:
 script:
   - cd norpy; ./waf configure build --debug; cd ..
   - py.test
+  - cd development/tests; python run_pr_testing.py; cd ../..
 
 notifications:
   slack:

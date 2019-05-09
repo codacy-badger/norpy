@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""This module is a first take at regression tests."""
+"""This script allows to run the regression tests."""
 import pickle as pkl
 import argparse
 
