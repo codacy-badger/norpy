@@ -20,6 +20,7 @@ install:
 
 before_script:
   - export PYTHONPATH=$PYTHONPATH:$(pwd)
+  - export PYTHONPATH=$PYTHONPATH:$(pwd)/submodules/ose_utils
 
 script:
   - cd norpy; ./waf configure build --debug; cd ..

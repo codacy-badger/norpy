@@ -1,3 +1,4 @@
 [submodule "submodules/ose_utils"]
 	path = submodules/ose_utils
 	url = https://github.com/OpenSourceEconomics/ose_utils.git
+	branch = norpy_integration
