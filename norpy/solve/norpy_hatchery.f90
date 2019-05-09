@@ -249,8 +249,7 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
 
             ! Now we add the type-specific deviation.
             DO i = 2, 3
-                ! TODO: Is this fine? Why the i - 1 and not just i
-                rewards(i) = rewards(i) + type_spec_shifts(type_, i - 1)
+                rewards(i) = rewards(i) + type_spec_shifts(type_, i)
             END DO
 
             ! We can now also added the common component of rewards.
