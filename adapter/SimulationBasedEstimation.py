@@ -20,6 +20,7 @@ from norpy.python.shared.shared_constants import DATA_FORMATS_SIM
 from respy.python.shared.shared_constants import DATA_LABELS_SIM
 from respy.python.shared.shared_auxiliary import create_draws
 from respy.python.shared.shared_constants import MISSING_INT
+from norpy.model_spec import get_model_obj
 import f2py_interface as respy_f2py
 
 
@@ -29,7 +30,7 @@ class SimulationBasedEstimationCls(EstimationCls):
 
         super().__init__()
 
-        self.respy_base = respy_obj_from_new_init(init_file)
+        self.respy_base = get_model_obj(init_file)
 
         # Creating a random data array also for the SMM routine allows to align a lot of the
         # designs across the two different estimation strategies.
@@ -44,7 +45,8 @@ class SimulationBasedEstimationCls(EstimationCls):
         self.set_derived_attributes()
 
         # We always lock in an evaluation at the starting values and prepare for the evaluation
-        # of the criterion function.
+        # of the criterion function.Was würden wir denn das set derived attributes machen sollte ?
+        #was soll uns denn x_free_econ bringen ??
         self._prepare_evaluate()
         self.evaluate(self.x_free_econ_start)
 
@@ -137,25 +139,4 @@ class SimulationBasedEstimationCls(EstimationCls):
         args = (smm_sample_f2py, state_space_info, initial_conditions, disturbances, slavecomm)
         self.simulate_sample = partial(*args)
 
-    def _logging_smm(self, stats_obs, stats_sim):
-        """This method contains logging capabilities that are just relevant for the SMM routine."""
-        fname = 'monitoring.estimagic.smm.info'
-        if self.num_evals == 1 and os.path.exists(fname):
-            os.unlink(fname)
 
-        with open(fname, 'a+') as outfile:
-
-            fmt_ = '\n\n{:>8}{:>15}\n\n'
-            outfile.write(fmt_.format('EVALUATION', self.num_evals))
-
-            fmt_ = '{:>8}' + '{:>15}' * 4 + '\n\n'
-            info = ['Moment', 'Observed', 'Simulated', 'Difference', 'Weight']
-            outfile.write(fmt_.format(*info))
-
-            for i, moment in enumerate(stats_obs):
-
-                stat_obs, stat_sim = stats_obs[i], stats_sim[i]
-                info = [i, stat_obs, stat_sim, abs(stat_obs - stat_sim), self.weighing_matrix[i, i]]
-
-                fmt_ = '{:>8}' + '{:15.5f}' * 4 + '\n'
-                outfile.write(fmt_.format(*info))
