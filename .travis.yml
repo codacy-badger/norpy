@@ -31,3 +31,4 @@ notifications:
       on_failure: never
 
   email: false
+
