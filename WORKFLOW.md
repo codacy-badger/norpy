@@ -12,5 +12,5 @@
 
 Set frequencies in PR Testing setup to:
 * robustness tests - 60 minutes
-* property tests - 5 hours
-* regression tests - 10000 (entire regression vault)
+* property tests - 5 hours (once available)
+* regression tests - 10,000 (entire regression vault)
