@@ -28,8 +28,3 @@ if __name__ == '__main__':
 
     vault = pkl.load(open(PACKAGE_DIR / 'tests/regression_vault.pkl', 'rb'))
     check_regression_vault(run_regression_test, args.num_tests, vault)
-
-# TODO: property tests
-# set up PR_Testing script
-# set up automatic run of short pr test on travis
-# consequence for OSE utils, new branch
