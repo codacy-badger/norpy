@@ -458,8 +458,8 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, periods_reward
             END IF
 
             ! Write agent identifier and current period to data frame
-            data_sim(count + 1, 1) = DBLE(i-1)
-            data_sim(count + 1, 2) = DBLE(period-1)
+            data_sim(count + 1, 1) = DBLE(i)
+            data_sim(count + 1, 2) = DBLE(period)
 
             ! Calculate ex post rewards
             rewards_systematic = periods_rewards_systematic(period, k+1, :)
@@ -485,8 +485,8 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, periods_reward
             END IF
 
             ! Write relevant state space for period to data frame
-            data_sim(count+1, 5:7) = current_state(:3)
-            data_sim(count+1, 8) = current_state(4)-1
+            data_sim(count+1, 5:8) = current_state(:4)
+
             
 
             ! As we are working with a simulated dataset, we can also output additional information that is not available in an observed dataset. The discount rate is included as this allows to construct the EMAX with the information provided in the simulation output.
