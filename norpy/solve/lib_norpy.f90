@@ -387,18 +387,22 @@ CONTAINS
         ! Algorithm
         !-------------------------------------------------------------------------------------------
 
-        future_idx = mapping_state_idx(period + 1 + 1, exp + 1 + 1, edu + 1, 1, type_)
-        emaxs(1) = periods_emax(period + 1 + 1, future_idx + 1)
+        future_idx = mapping_state_idx(period + 1 , exp + 1 + 1, edu + 1, 1, type_)
+
+        emaxs(1) = periods_emax(period + 1 , future_idx + 1)
 
         IF(edu .GE. model_spec%edu_max) THEN
             emaxs(2) = zero_dble
         ELSE
-            future_idx = mapping_state_idx(period + 1 + 1, exp + 1, edu + 1 + 1, 2, type_)
-            emaxs(2) = periods_emax(period + 1 + 1, future_idx + 1)
+            future_idx = mapping_state_idx(period + 1 , exp + 1, edu + 1 + 1, 2, type_)
+        !WRITE(*,*) future_idx
+        !WRITE(*,*) period
+         
+            emaxs(2) = periods_emax(period + 1, future_idx + 1)
         END IF
 
-        future_idx = mapping_state_idx(period + 1 + 1, exp + 1, edu + 1, 3, type_)
-        emaxs(3) = periods_emax(period + 1 + 1, future_idx + 1)
+        future_idx = mapping_state_idx(period + 1, exp + 1, edu + 1, 3, type_)
+        emaxs(3) = periods_emax(period + 1 , future_idx + 1)
 
     END FUNCTION
     !***********************************************************************************************

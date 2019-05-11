@@ -321,8 +321,10 @@ SUBROUTINE f2py_backward_induction(periods_emax, states_all, states_number_perio
     model_spec%num_periods = num_periods
 
     periods_emax = MISSING_FLOAT
-
+    WRITE(*,*) model_spec%num_periods
     DO period = (model_spec%num_periods), 1, -1
+    WRITE(*,*) period
+
 
         draws_emax_risk = periods_draws_emax(period , :, :)
 
@@ -338,7 +340,7 @@ SUBROUTINE f2py_backward_induction(periods_emax, states_all, states_number_perio
                     choice_lagged, model_spec)
 
             IF (period .NE. (num_periods)) THEN
-                continuation_value = get_emaxs(mapping_state_idx, period-1, periods_emax, &
+                continuation_value = get_emaxs(mapping_state_idx, period, periods_emax, &
                         model_spec, exp, edu, type_)
             ELSE
                 continuation_value = zero_dble
@@ -347,6 +349,7 @@ SUBROUTINE f2py_backward_induction(periods_emax, states_all, states_number_perio
             emax = construct_emax_risk(draws_emax_risk, rewards_systematic, model_spec, edu, &
                     wages_systematic, continuation_value)
             periods_emax(period , k ) = emax
+            
 
         END DO
 
@@ -411,6 +414,7 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, periods_reward
     !-----------------------------------------------------------------------------------------------
 
     ! Construct derived types
+    WRITE(*,*) sample_types
     model_spec%coeffs_common = coeffs_common
     model_spec%edu_max = edu_max
     model_spec%coeffs_work = coeffs_work
@@ -423,14 +427,16 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, periods_reward
     ! Iterate over agents and periods
     count = 0
 
-    DO i = 1, (num_agents_sim)
+    DO i = 1, (model_spec%num_agents_sim)
 
         current_state = states_all(1, 1, :)
 
         current_state(2) = sample_edu_start(i)
         current_state(3) = sample_lagged_start(i)
         current_state(4) = sample_types(i)
-
+        
+         
+        
         DO period = 1, (model_spec%num_periods)
 
             ! Distribute state space
@@ -440,12 +446,13 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, periods_reward
             type_ = current_state(4)
 
             ! Getting state index
-            k = mapping_state_idx(period-1, exp + 1, edu + 1, choice_lagged, type_)
+            
+            k = mapping_state_idx(period, exp + 1, edu + 1, choice_lagged, type_+1)
 
             ! TODO: THere is the +1 again
             IF (period .NE. (num_periods)) THEN
                 continuation_value = get_emaxs(mapping_state_idx, period, periods_emax, &
-                        model_spec, exp, edu, type_)
+                        model_spec, exp, edu, type_+1)
             ELSE
                 continuation_value = zero_dble
             END IF
@@ -487,7 +494,7 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, periods_reward
             data_sim(count+1, 18:18) = model_spec%delta
 
             ! For testing purposes, we also explicitly include the general reward component and the common component.
-            covariates = construct_covariates(exp, edu, choice_lagged, type_, period)
+            covariates = construct_covariates(exp, edu, choice_lagged, type_+1, period)
             data_sim(count+1, 19) = calculate_rewards_general(covariates, model_spec%coeffs_work)
             data_sim(count+1, 20) = calculate_rewards_common(covariates, model_spec)
             data_sim(count+1, 21:23) = rewards_ex_post
