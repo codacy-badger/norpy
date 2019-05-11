@@ -147,7 +147,7 @@ END SUBROUTINE
 !***************************************************************************************************
 SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_periods, &
         states_number_period, states_all, max_states_period, coeffs_common, coeffs_work, &
-        coeffs_edu, coeffs_home, type_spec_shifts)
+        coeffs_edu, coeffs_home, type_shifts)
 
     USE lib_norpy
 
@@ -157,7 +157,7 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
 
     DOUBLE PRECISION, INTENT(OUT) :: periods_rewards_systematic(num_periods, max_states_period, 3)
 
-    DOUBLE PRECISION, INTENT(IN) :: type_spec_shifts(:, :)
+    DOUBLE PRECISION, INTENT(IN) :: type_shifts(:, :)
     DOUBLE PRECISION, INTENT(IN) :: coeffs_common(2)
     DOUBLE PRECISION, INTENT(IN) :: coeffs_home(3)
     DOUBLE PRECISION, INTENT(IN) :: coeffs_edu(7)
@@ -202,8 +202,8 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
     model_spec%coeffs_edu = coeffs_edu
 
     ! TODO: A selected few need to be allocated first.
-    ALLOCATE(model_spec%type_shifts(SIZE(type_spec_shifts, 1), 4))
-    model_spec%type_shifts = type_spec_shifts
+    ALLOCATE(model_spec%type_shifts(SIZE(type_shifts, 1) ,3))
+    model_spec%type_shifts = type_shifts
 
     periods_rewards_systematic = MISSING_FLOAT
 
@@ -249,7 +249,7 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
 
             ! Now we add the type-specific deviation.
             DO i = 2, 3
-                rewards(i) = rewards(i) + type_spec_shifts(type_, i)
+                rewards(i) = rewards(i) + model_spec%type_shifts(type_, i)
             END DO
 
             ! We can now also added the common component of rewards.
@@ -447,12 +447,12 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, periods_reward
 
             ! Getting state index
             
-            k = mapping_state_idx(period, exp + 1, edu + 1, choice_lagged, type_+1)
+            k = mapping_state_idx(period, exp + 1, edu + 1, choice_lagged, type_)
 
             ! TODO: THere is the +1 again
             IF (period .NE. (num_periods)) THEN
                 continuation_value = get_emaxs(mapping_state_idx, period, periods_emax, &
-                        model_spec, exp, edu, type_+1)
+                        model_spec, exp, edu, type_)
             ELSE
                 continuation_value = zero_dble
             END IF
@@ -494,7 +494,7 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, periods_reward
             data_sim(count+1, 18:18) = model_spec%delta
 
             ! For testing purposes, we also explicitly include the general reward component and the common component.
-            covariates = construct_covariates(exp, edu, choice_lagged, type_+1, period)
+            covariates = construct_covariates(exp, edu, choice_lagged, type_, period)
             data_sim(count+1, 19) = calculate_rewards_general(covariates, model_spec%coeffs_work)
             data_sim(count+1, 20) = calculate_rewards_common(covariates, model_spec)
             data_sim(count+1, 21:23) = rewards_ex_post
