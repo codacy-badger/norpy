@@ -151,7 +151,7 @@ def simulate(model_object):
     # TODO: This needs to be set in the initialization file.
     sample_lagged_start = np.random.choice([3, 3], p=[0.1, 0.9], size=model_object.num_agents_sim)
     sample_edu_start = np.random.choice(model_object.edu_range_start, size=model_object.num_agents_sim)
-    sample_types = np.random.choice(range(model_object.num_types), size=model_object.num_agents_sim)
+    sample_types = np.random.choice(range(1,model_object.num_types+1), size=model_object.num_agents_sim)
 
     args = [
         state_space_info["states_all"],
