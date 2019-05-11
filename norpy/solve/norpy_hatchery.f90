@@ -447,19 +447,19 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, periods_reward
 
             ! Getting state index
             
-            k = mapping_state_idx(period, exp + 1, edu + 1, choice_lagged, type_)
+            k = mapping_state_idx(period, exp + 1, edu + 1, choice_lagged, type_+1)
 
             ! TODO: THere is the +1 again
             IF (period .NE. (num_periods)) THEN
                 continuation_value = get_emaxs(mapping_state_idx, period, periods_emax, &
-                        model_spec, exp, edu, type_)
+                        model_spec, exp, edu, type_+1)
             ELSE
                 continuation_value = zero_dble
             END IF
 
             ! Write agent identifier and current period to data frame
-            data_sim(count + 1, 1) = DBLE(i)
-            data_sim(count + 1, 2) = DBLE(period)
+            data_sim(count + 1, 1) = DBLE(i-1)
+            data_sim(count + 1, 2) = DBLE(period-1)
 
             ! Calculate ex post rewards
             rewards_systematic = periods_rewards_systematic(period, k+1, :)
