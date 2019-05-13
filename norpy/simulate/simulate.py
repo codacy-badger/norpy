@@ -6,7 +6,7 @@ import os
 
 from scipy.stats import invwishart
 
-import numpy as 
+import numpy as np
 
 
 
