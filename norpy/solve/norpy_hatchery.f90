@@ -321,9 +321,9 @@ SUBROUTINE f2py_backward_induction(periods_emax, states_all, states_number_perio
     model_spec%num_periods = num_periods
 
     periods_emax = MISSING_FLOAT
-    WRITE(*,*) model_spec%num_periods
+    
     DO period = (model_spec%num_periods), 1, -1
-    WRITE(*,*) period
+   
 
 
         draws_emax_risk = periods_draws_emax(period , :, :)
@@ -414,7 +414,7 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, periods_reward
     !-----------------------------------------------------------------------------------------------
 
     ! Construct derived types
-    WRITE(*,*) sample_types
+    
     model_spec%coeffs_common = coeffs_common
     model_spec%edu_max = edu_max
     model_spec%coeffs_work = coeffs_work
