@@ -5,9 +5,9 @@
 import os
 
 from scipy.stats import invwishart
-from numpy import f2py
-import pandas as pd
-import numpy as np
+
+import numpy as 
+
 
 
 from norpy.solve.norpy_hatchery import f2py_calculate_immediate_rewards
