@@ -89,7 +89,7 @@ class ModelSpec(typing.NamedTuple):
                 "edu_max",
                 "num_agents_sim",
                 "seed_sim",
-                "seed_emax"
+                "seed_emax",
             ]:
                 assert isinstance(attr, int)
                 assert attr > 0
@@ -102,7 +102,7 @@ class ModelSpec(typing.NamedTuple):
                 "coeffs_edu",
                 "type_spec_shifts",
                 "edu_range_start",
-                "shocks_cov"
+                "shocks_cov",
             ]:
                 assert isinstance(attr, np.ndarray)
             else:
@@ -140,6 +140,7 @@ class ModelSpec(typing.NamedTuple):
 
     def __ne__(self, other):
         """Check the inequality of two model specification."""
+
         return not self.__eq__(other)
 
 
@@ -185,8 +186,7 @@ def get_random_model_specification(constr=None):
             "type_spec_shifts",
             "shocks_cov",
             "seed_sim",
-            "seed_emax"
-
+            "seed_emax",
         ]
         for x in list_of_var:
             if x in list(constr.keys()):
@@ -212,9 +212,8 @@ def get_random_model_specification(constr=None):
         size=init_dict["num_types"] * 3
     ).reshape((init_dict["num_types"], 3))
     init_dict["shocks_cov"] = invwishart.rvs(df=3, scale=np.identity(3))
-    init_dict["seed_sim"] = np.random.randint(1,10000)
+    init_dict["seed_sim"] = np.random.randint(1, 10000)
     init_dict["seed_emax"] = np.random.randint(1, 10000)
-    
 
     process_constraints(constr)
 
@@ -228,7 +227,7 @@ def get_model_obj(source=None, constr=None):
     a variety of differnt input types.
 
     Args:
-        input: str, dictionary, None specifying the input for
+        source: str, dictionary, None specifying the input for
             for the model specification.
         constr: A dictionary with the constraints imposed
             on a random initialization file.

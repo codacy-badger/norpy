@@ -8,10 +8,11 @@ import norpy
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='Run regression tests')
+    parser = argparse.ArgumentParser(description="Run regression tests")
 
-    parser.add_argument('-hrs', '--hours', type=float, help='hours to run',
-                        default=1, dest='hours')
+    parser.add_argument(
+        "-hrs", "--hours", type=float, help="hours to run", default=1, dest="hours"
+    )
 
     args = parser.parse_args()
 

@@ -23,8 +23,6 @@ from norpy.simulate.simulate_auxiliary import HUGE_FLOAT
 from norpy.simulate.simulate_auxiliary import LARGE_FLOAT
 
 
-
-
 def create_state_space(model_object, boolean=False):
     args = (
         model_object.num_periods,
@@ -37,7 +35,7 @@ def create_state_space(model_object, boolean=False):
     states_all, states_number_period, mapping_state_idx, max_states_period = f2py_create_state_space(
         *args
     )
-    
+
     state_space_info = {
         "states_all": states_all,
         "states_number_period": states_number_period,
@@ -143,15 +141,21 @@ def simulate(model_object):
         model_object, state_space_info
     )
     periods_draws_emax = return_simulated_shocks(model_object)
-    periods_draws_sims = return_simulated_shocks(model_object,True)
+    periods_draws_sims = return_simulated_shocks(model_object, True)
     periods_emax = backward_induction_procedure(
         model_object, state_space_info, periods_rewards_systematic, periods_draws_emax
     )
     np.random.seed(model_object.seed_sim)
     # TODO: This needs to be set in the initialization file.
-    sample_lagged_start = np.random.choice([3, 3], p=[0.1, 0.9], size=model_object.num_agents_sim)
-    sample_edu_start = np.random.choice(model_object.edu_range_start, size=model_object.num_agents_sim)
-    sample_types = np.random.choice(range(1,model_object.num_types+1), size=model_object.num_agents_sim)
+    sample_lagged_start = np.random.choice(
+        [3, 3], p=[0.1, 0.9], size=model_object.num_agents_sim
+    )
+    sample_edu_start = np.random.choice(
+        model_object.edu_range_start, size=model_object.num_agents_sim
+    )
+    sample_types = np.random.choice(
+        range(1, model_object.num_types + 1), size=model_object.num_agents_sim
+    )
 
     args = [
         state_space_info["states_all"],

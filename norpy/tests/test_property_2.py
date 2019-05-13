@@ -5,7 +5,6 @@ import os
 import sys
 
 
-
 from numpy import f2py
 import pandas as pd
 import numpy as np
@@ -18,16 +17,17 @@ from norpy import (
     return_immediate_rewards,
     backward_induction_procedure,
     simulate,
-    return_simulated_shocks
+    return_simulated_shocks,
 )
 from norpy import get_random_model_specification, get_model_obj
+
 
 def random_model_object():
     model_object = get_model_obj(get_random_model_specification())
     return model_object
 
 
-@pytest.fixture(params=[str(x) for x in list(range(10))])
+@pytest.fixture
 def set_up_last_period():
 
     # We want to set up a basic testing infrastructure for the state space creation.
@@ -38,10 +38,10 @@ def set_up_last_period():
     )
     state_space = create_state_space(model_object)
     immediate_rewards = return_immediate_rewards(model_object, state_space)
-    
-    periods_draws_emax=return_simulated_shocks(model_object, simulation=False)
+
+    periods_draws_emax = return_simulated_shocks(model_object, simulation=False)
     periods_emax = backward_induction_procedure(
-        model_object, state_space, immediate_rewards,periods_draws_emax
+        model_object, state_space, immediate_rewards, periods_draws_emax
     )
 
     k_to_check = np.random.randint(1, state_space["states_number_period"][-1])
@@ -111,7 +111,7 @@ def test_last_period_value_func(set_up_last_period):
 #####Now do the same for any period!
 
 
-@pytest.fixture(params=[str(x) for x in list(range(10))])
+@pytest.fixture
 def set_up_any_period():
     model_object = get_model_obj(
         get_random_model_specification(
@@ -120,9 +120,9 @@ def set_up_any_period():
     )
     state_space = create_state_space(model_object)
     immediate_rewards = return_immediate_rewards(model_object, state_space)
-    periods_draws_emax=return_simulated_shocks(model_object, simulation=False)
+    periods_draws_emax = return_simulated_shocks(model_object, simulation=False)
     periods_emax = backward_induction_procedure(
-        model_object, state_space, immediate_rewards,periods_draws_emax
+        model_object, state_space, immediate_rewards, periods_draws_emax
     )
     period_to_check = np.random.randint(0, model_object.num_periods - 1)
     k_to_check = np.random.randint(
@@ -219,7 +219,7 @@ def test_value_func_general(set_up_any_period):
     )
 
 
-@pytest.fixture(params=[str(x) for x in list(range(10))])
+@pytest.fixture
 def init_simulation(constr=False):
     model_object = get_model_obj(
         get_random_model_specification(
@@ -260,7 +260,7 @@ def test_simulation_descriptives(init_simulation):
 # Check for arr
 
 
-@pytest.fixture(params=[str(x) for x in list(range(10))])
+@pytest.fixture
 def init_simulation_huge_rewards():
     model_object = get_model_obj(
         get_random_model_specification(

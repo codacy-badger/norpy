@@ -11,7 +11,7 @@ Also there is still considerable repetition in the selection procedure which has
 
 """
 import os
-import sys 
+import sys
 
 
 from numpy import f2py
@@ -29,12 +29,12 @@ def random_model_object():
     return model_object
 
 
-@pytest.fixture(params=[str(x) for x in list(range(10))])
+@pytest.fixture
 def input_output_state_space():
 
     model_object = random_model_object()
     state_space = create_state_space(model_object)
-    
+
     period = np.random.randint(1, model_object.num_periods + 1)
     # Split up different cases
     type_ = np.random.randint(1, model_object.num_types + 1)
@@ -42,9 +42,7 @@ def input_output_state_space():
         np.random.randint(len(model_object.edu_range_start))
     ]
     exp_a = np.random.randint(period)
-    edu_add = np.random.randint(
-        min(period - exp_a, model_object.edu_max - edu_start)
-    )
+    edu_add = np.random.randint(min(period - exp_a, model_object.edu_max - edu_start))
 
     if exp_a == 0:
         if period == 1:
@@ -86,7 +84,7 @@ def test_state_space_1(input_output_state_space):
     )
 
 
-@pytest.fixture(params=[str(x) for x in list(range(10))])
+@pytest.fixture
 def input_not_output_state_space():
     model_object = random_model_object()
 
@@ -132,7 +130,7 @@ def test_state_space_2(input_not_output_state_space):
     )
 
 
-@pytest.fixture(params=[str(x) for x in list(range(10))])
+@pytest.fixture
 def input_output_size():
     model_object = random_model_object()
 
@@ -157,7 +155,7 @@ def test_state_space_3(input_output_size):
     assert input_output_size[3].max() == input_output_size[2]
 
 
-@pytest.fixture(params=[str(x) for x in list(range(10))])
+@pytest.fixture
 def input_output_dimension():
     model_object = get_model_obj(get_random_model_specification())
     state_space = create_state_space(model_object, True)
@@ -189,8 +187,8 @@ def input_output_dimension():
 
 def test_state_space_dimension(input_output_dimension):
     np.testing.assert_array_almost_equal(
-        input_output_dimension[2][input_output_dimension[3] - 1]
-        , input_output_dimension[4]
+        input_output_dimension[2][input_output_dimension[3] - 1],
+        input_output_dimension[4],
     )
 
 
@@ -199,7 +197,7 @@ def test_state_space_dimension(input_output_dimension):
 ###############################################################################
 
 
-@pytest.fixture(params=[str(x) for x in list(range(10))])
+@pytest.fixture
 def input_output_immediate_rewards_home():
 
     model_object = get_model_obj(
@@ -252,17 +250,17 @@ def input_output_immediate_rewards_home():
 
 
 def test_immediate_rewards_home(input_output_immediate_rewards_home):
-    np.testing.assert_array_almost_equal (
+    np.testing.assert_array_almost_equal(
         input_output_immediate_rewards_home[0][
             input_output_immediate_rewards_home[1] - 1,
             input_output_immediate_rewards_home[3],
             2,
-        ]
-        , input_output_immediate_rewards_home[2]
+        ],
+        input_output_immediate_rewards_home[2],
     )
 
 
-@pytest.fixture(params=[str(x) for x in list(range(10))])
+@pytest.fixture
 def input_output_immediate_rewards_educ():
 
     model_object = get_model_obj(
@@ -365,7 +363,7 @@ def test_immediate_rewards_educ(input_output_immediate_rewards_educ):
     )
 
 
-@pytest.fixture(params=[str(x) for x in list(range(10))])
+@pytest.fixture
 def input_output_immediate_rewards_occupation():
 
     model_object = get_model_obj(
