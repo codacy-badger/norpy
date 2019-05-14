@@ -540,7 +540,6 @@ def set_up_last_period():
 
 
 def test_last_period_value_func(set_up_last_period):
-
     np.testing.assert_array_almost_equal(
         np.array([set_up_last_period[0]]),
         np.array(
