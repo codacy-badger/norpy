@@ -10,16 +10,20 @@ Also there is still considerable repetition in the selection procedure which has
 
 
 """
-import os
-import sys
 
-
-from numpy import f2py
-import pandas as pd
 import numpy as np
 import pytest
 import math
+import pytest
 
+from norpy import (
+    create_state_space,
+    return_immediate_rewards,
+    backward_induction_procedure,
+    simulate,
+    return_simulated_shocks,
+)
+from norpy import get_random_model_specification, get_model_obj
 from norpy import create_state_space, return_immediate_rewards
 from norpy import get_random_model_specification, get_model_obj
 
@@ -190,11 +194,6 @@ def test_state_space_dimension(input_output_dimension):
         input_output_dimension[2][input_output_dimension[3] - 1],
         input_output_dimension[4],
     )
-
-
-###############################################################################
-######################Test immediate rewards###################################
-###############################################################################
 
 
 @pytest.fixture
@@ -464,29 +463,6 @@ def test_immediate_rewards_occupation(input_output_immediate_rewards_occupation)
         np.array([input_output_immediate_rewards_occupation[3]]),
     )
 
-"""
-This module contains the second property testing battery
-"""
-import os
-import sys
-
-
-from numpy import f2py
-import pandas as pd
-import numpy as np
-import pytest
-import math
-import pytest
-
-from norpy import (
-    create_state_space,
-    return_immediate_rewards,
-    backward_induction_procedure,
-    simulate,
-    return_simulated_shocks,
-)
-from norpy import get_random_model_specification, get_model_obj
-
 
 def random_model_object():
     model_object = get_model_obj(get_random_model_specification())
@@ -574,9 +550,6 @@ def test_last_period_value_func(set_up_last_period):
     )
 
 
-#####Now do the same for any period!
-
-
 @pytest.fixture
 def set_up_any_period():
     model_object = get_model_obj(
@@ -625,7 +598,6 @@ def set_up_any_period():
     else:
         general = general
 
-    ##Obtain next periods states
     next_period_1 = state_space["mapping_state_idx"][
         period_to_check + 1,
         state_to_check[0] + 1,
@@ -721,9 +693,6 @@ def test_simulation_descriptives(init_simulation):
     )
 
     # assert dat[num_periods*(agent_to_check-1)+period_to_check,2]==1
-
-
-# Check for arr
 
 
 @pytest.fixture

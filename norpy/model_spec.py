@@ -16,6 +16,7 @@ from scipy.stats import invwishart
 # Python 3.6 or higher.
 import typing
 
+
 # Question how would I proceed with the intermediate model objects?
 class ModelSpec(typing.NamedTuple):
     """Model specification.
@@ -55,6 +56,7 @@ class ModelSpec(typing.NamedTuple):
     seed_emax: int
     # We make some of the private methods of the base class
     # public.
+
     def as_dict(self):
         return self._asdict()
 
@@ -130,6 +132,7 @@ class ModelSpec(typing.NamedTuple):
 
         Returns:
             A boolean corresponding to equality of specifications.
+            What are spec 1 and spec2 ?
         """
         assert isinstance(other, type(self))
         assert set(spec_1._fields) == set(spec_2._fields)

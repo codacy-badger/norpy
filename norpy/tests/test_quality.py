@@ -2,7 +2,6 @@
 import subprocess
 
 import numpy as np
-import pytest
 
 from norpy.norpy_config import PACKAGE_DIR
 
