@@ -1,0 +1,2 @@
+[flake8]
+exclude = norpy/.bld,norpy/.waf3-2.0.15-ff6573b86ad5ff5d449c8852ad58b8bc , submodules 
