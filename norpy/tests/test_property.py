@@ -14,7 +14,6 @@ Also there is still considerable repetition in the selection procedure which has
 import numpy as np
 import math
 
-
 from norpy import (
     create_state_space,
     return_immediate_rewards,
