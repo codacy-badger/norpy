@@ -12,9 +12,8 @@ Also there is still considerable repetition in the selection procedure which has
 """
 
 import numpy as np
-import pytest
 import math
-import pytest
+
 
 from norpy import (
     create_state_space,
@@ -33,7 +32,6 @@ def random_model_object():
     return model_object
 
 
-@pytest.fixture
 def input_output_state_space():
 
     model_object = random_model_object()
@@ -78,7 +76,7 @@ def input_output_state_space():
     return state_space["states_all"], manual, period
 
 
-def test_state_space_1(input_output_state_space):
+def test_state_space_1(input_output_state_space=input_output_state_space()):
     assert np.any(
         np.all(
             input_output_state_space[0][input_output_state_space[2] - 1]
@@ -88,7 +86,6 @@ def test_state_space_1(input_output_state_space):
     )
 
 
-@pytest.fixture
 def input_not_output_state_space():
     model_object = random_model_object()
 
@@ -119,7 +116,7 @@ def input_not_output_state_space():
     return state_space["states_all"], manual, period, state_space["max_states_period"]
 
 
-def test_state_space_2(input_not_output_state_space):
+def test_state_space_2(input_not_output_state_space=input_not_output_state_space()):
     assert (
         np.any(
             np.all(
@@ -134,7 +131,6 @@ def test_state_space_2(input_not_output_state_space):
     )
 
 
-@pytest.fixture
 def input_output_size():
     model_object = random_model_object()
 
@@ -155,11 +151,10 @@ def input_output_size():
     )
 
 
-def test_state_space_3(input_output_size):
+def test_state_space_3(input_output_size=input_output_size()):
     assert input_output_size[3].max() == input_output_size[2]
 
 
-@pytest.fixture
 def input_output_dimension():
     model_object = get_model_obj(get_random_model_specification())
     state_space = create_state_space(model_object, True)
@@ -189,14 +184,13 @@ def input_output_dimension():
     )
 
 
-def test_state_space_dimension(input_output_dimension):
+def test_state_space_dimension(input_output_dimension=input_output_dimension()):
     np.testing.assert_array_almost_equal(
         input_output_dimension[2][input_output_dimension[3] - 1],
         input_output_dimension[4],
     )
 
 
-@pytest.fixture
 def input_output_immediate_rewards_home():
 
     model_object = get_model_obj(
@@ -248,7 +242,9 @@ def input_output_immediate_rewards_home():
     return immediate_rewards, period_to_check, manually_calculated_result, k_to_check
 
 
-def test_immediate_rewards_home(input_output_immediate_rewards_home):
+def test_immediate_rewards_home(
+    input_output_immediate_rewards_home=input_output_immediate_rewards_home()
+):
     np.testing.assert_array_almost_equal(
         input_output_immediate_rewards_home[0][
             input_output_immediate_rewards_home[1] - 1,
@@ -259,7 +255,6 @@ def test_immediate_rewards_home(input_output_immediate_rewards_home):
     )
 
 
-@pytest.fixture
 def input_output_immediate_rewards_educ():
 
     model_object = get_model_obj(
@@ -347,7 +342,9 @@ def input_output_immediate_rewards_educ():
     return immediate_rewards, period_to_check, k_to_check, manually_calculated_result
 
 
-def test_immediate_rewards_educ(input_output_immediate_rewards_educ):
+def test_immediate_rewards_educ(
+    input_output_immediate_rewards_educ=input_output_immediate_rewards_educ()
+):
     np.testing.assert_array_almost_equal(
         np.array(
             [
@@ -362,7 +359,6 @@ def test_immediate_rewards_educ(input_output_immediate_rewards_educ):
     )
 
 
-@pytest.fixture
 def input_output_immediate_rewards_occupation():
 
     model_object = get_model_obj(
@@ -448,7 +444,9 @@ def input_output_immediate_rewards_occupation():
     return immediate_rewards, period_to_check, k_to_check, manually_calculated_result
 
 
-def test_immediate_rewards_occupation(input_output_immediate_rewards_occupation):
+def test_immediate_rewards_occupation(
+    input_output_immediate_rewards_occupation=input_output_immediate_rewards_occupation()
+):
 
     np.testing.assert_array_almost_equal(
         np.array(
@@ -469,7 +467,6 @@ def random_model_object():
     return model_object
 
 
-@pytest.fixture
 def set_up_last_period():
 
     # We want to set up a basic testing infrastructure for the state space creation.
@@ -539,7 +536,7 @@ def set_up_last_period():
     return manual_result, periods_emax, model_object.num_periods, k_to_check
 
 
-def test_last_period_value_func(set_up_last_period):
+def test_last_period_value_func(set_up_last_period=set_up_last_period()):
     np.testing.assert_array_almost_equal(
         np.array([set_up_last_period[0]]),
         np.array(
@@ -549,7 +546,6 @@ def test_last_period_value_func(set_up_last_period):
     )
 
 
-@pytest.fixture
 def set_up_any_period():
     model_object = get_model_obj(
         get_random_model_specification(
@@ -647,7 +643,7 @@ def set_up_any_period():
     return manual_result, periods_emax, period_to_check, k_to_check
 
 
-def test_value_func_general(set_up_any_period):
+def test_value_func_general(set_up_any_period=set_up_any_period()):
 
     np.testing.assert_array_almost_equal(
         np.array([set_up_any_period[0]]),
@@ -656,7 +652,6 @@ def test_value_func_general(set_up_any_period):
     )
 
 
-@pytest.fixture
 def init_simulation(constr=False):
     model_object = get_model_obj(
         get_random_model_specification(
@@ -678,7 +673,7 @@ def init_simulation(constr=False):
     )
 
 
-def test_simulation_descriptives(init_simulation):
+def test_simulation_descriptives(init_simulation=init_simulation()):
     assert init_simulation[0].shape == (init_simulation[1] * init_simulation[2], 23)
     assert init_simulation[0][(init_simulation[5] - 1) * init_simulation[1], 4] == 0
     assert init_simulation[0][
@@ -694,7 +689,6 @@ def test_simulation_descriptives(init_simulation):
     # assert dat[num_periods*(agent_to_check-1)+period_to_check,2]==1
 
 
-@pytest.fixture
 def init_simulation_huge_rewards():
     model_object = get_model_obj(
         get_random_model_specification(
@@ -714,7 +708,9 @@ def init_simulation_huge_rewards():
     return dat, model_object.num_periods, period_to_check, agent_to_check
 
 
-def test_simulation_with_high_work_rewards(init_simulation_huge_rewards):
+def test_simulation_with_high_work_rewards(
+    init_simulation_huge_rewards=init_simulation_huge_rewards()
+):
     assert (
         init_simulation_huge_rewards[0][
             (init_simulation_huge_rewards[3] - 1) * init_simulation_huge_rewards[1]
