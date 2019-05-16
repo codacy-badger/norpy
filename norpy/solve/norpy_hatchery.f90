@@ -64,7 +64,7 @@ SUBROUTINE f2py_create_state_space(states_all, states_number_period, mapping_sta
     DO period = 1, (num_periods)
 
         ! Count admissible realizations of state space by period
-        k = 0
+        k = 1
 
         ! Loop over all types.
         DO type_ = 1, num_types
@@ -121,7 +121,7 @@ SUBROUTINE f2py_create_state_space(states_all, states_number_period, mapping_sta
                             END IF
 
                             mapping_state_idx(period, exp + 1, edu_start + edu_add + 1, choice_lagged, type_) = k
-                            states_all(period, k + 1, :) = (/ exp, edu_start + edu_add, choice_lagged, type_ /)
+                            states_all(period, k, :) = (/ exp, edu_start + edu_add, choice_lagged, type_ /)
 
                             ! Update count
                             k = k + 1
@@ -136,7 +136,7 @@ SUBROUTINE f2py_create_state_space(states_all, states_number_period, mapping_sta
 
         END DO
 
-        states_number_period(period) = k
+        states_number_period(period) = k - 1 
 
     END DO
 
@@ -427,7 +427,7 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, periods_reward
     ! Iterate over agents and periods
     count = 0
 
-    DO i = 1, (model_spec%num_agents_sim)
+    DO i = 1, model_spec%num_agents_sim
 
         current_state = states_all(1, 1, :)
 
@@ -437,7 +437,7 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, periods_reward
         
          
         
-        DO period = 1, (model_spec%num_periods)
+        DO period = 1, model_spec%num_periods
 
             ! Distribute state space
             exp = current_state(1)
@@ -446,11 +446,9 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, periods_reward
             type_ = current_state(4)
 
             ! Getting state index
-            
             k = mapping_state_idx(period, exp + 1, edu + 1, choice_lagged, type_)
 
-            ! TODO: THere is the +1 again
-            IF (period .NE. (num_periods)) THEN
+                IF (period .NE. (num_periods)) THEN
                 continuation_value = get_emaxs(mapping_state_idx, period, periods_emax, &
                         model_spec, exp, edu, type_)
             ELSE
@@ -462,9 +460,8 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, periods_reward
             data_sim(count + 1, 2) = DBLE(period)
 
             ! Calculate ex post rewards
-            rewards_systematic = periods_rewards_systematic(period, k+1, :)
+            rewards_systematic = periods_rewards_systematic(period, k, :)
             draws = periods_draws_sims(period , i, :)
-
             wages_systematic = back_out_systematic_wages(rewards_systematic, exp, edu, &
                     choice_lagged, model_spec)
 
@@ -477,30 +474,30 @@ SUBROUTINE f2py_simulate(data_sim, states_all, mapping_state_idx, periods_reward
 
             ! Determine and record optimal choice
             choice = MAXLOC(total_values, DIM = one_int)
-            data_sim(count+1 , 3) = DBLE(choice)
+            data_sim(count + 1 , 3) = DBLE(choice)
 
             ! Record wages
             IF ((choice .EQ. one_int)) THEN
-                data_sim(count+1, 4) = wages_systematic * draws(1)
+                data_sim(count + 1, 4) = wages_systematic * draws(1)
             END IF
 
             ! Write relevant state space for period to data frame
-            data_sim(count+1, 5:8) = current_state(:4)
+            data_sim(count + 1, 5:8) = current_state(:4)
 
             
 
             ! As we are working with a simulated dataset, we can also output additional information that is not available in an observed dataset. The discount rate is included as this allows to construct the EMAX with the information provided in the simulation output.
-            data_sim(count+1, 9:11) = total_values
-            data_sim(count+1, 12:14) = rewards_systematic
-            data_sim(count+1, 15:17) = draws
-            data_sim(count+1, 18:18) = model_spec%delta
+            data_sim(count + 1, 9:11) = total_values
+            data_sim(count + 1, 12:14) = rewards_systematic
+            data_sim(count + 1, 15:17) = draws
+            data_sim(count + 1, 18:18) = model_spec%delta
 
             ! For testing purposes, we also explicitly include the general reward component and the common component.
             covariates = construct_covariates(exp, edu, choice_lagged, type_, period)
 
-            data_sim(count+1, 19) = calculate_rewards_general(covariates, model_spec%coeffs_work)
-            data_sim(count+1, 20) = calculate_rewards_common(covariates, model_spec)
-            data_sim(count+1, 21:23) = rewards_ex_post
+            data_sim(count + 1, 19) = calculate_rewards_general(covariates, model_spec%coeffs_work)
+            data_sim(count + 1, 20) = calculate_rewards_common(covariates, model_spec)
+            data_sim(count + 1, 21:23) = rewards_ex_post
 
             !# Update work experiences or education
             IF ((choice .EQ. one_int) .OR. (choice .EQ. two_int)) THEN

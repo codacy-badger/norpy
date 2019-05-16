@@ -624,27 +624,37 @@ def _set_up_any_period():
     else:
         general = general
 
-    next_period_1 = state_space["mapping_state_idx"][
-        period_to_check + 1,
-        state_to_check[0] + 1,
-        state_to_check[1],
-        0,
-        state_to_check[3] - 1,
-    ]
-    next_period_2 = state_space["mapping_state_idx"][
-        period_to_check + 1,
-        state_to_check[0],
-        state_to_check[1] + 1,
-        1,
-        state_to_check[3] - 1,
-    ]
-    next_period_3 = state_space["mapping_state_idx"][
-        period_to_check + 1,
-        state_to_check[0],
-        state_to_check[1],
-        2,
-        state_to_check[3] - 1,
-    ]
+    # the minus -1 rfelect the difference between python and fortran indexing !
+    next_period_1 = (
+        state_space["mapping_state_idx"][
+            period_to_check + 1,
+            state_to_check[0] + 1,
+            state_to_check[1],
+            0,
+            state_to_check[3] - 1,
+        ]
+        - 1
+    )
+    next_period_2 = (
+        state_space["mapping_state_idx"][
+            period_to_check + 1,
+            state_to_check[0],
+            state_to_check[1] + 1,
+            1,
+            state_to_check[3] - 1,
+        ]
+        - 1
+    )
+    next_period_3 = (
+        state_space["mapping_state_idx"][
+            period_to_check + 1,
+            state_to_check[0],
+            state_to_check[1],
+            2,
+            state_to_check[3] - 1,
+        ]
+        - 1
+    )
 
     for x in range(model_object.num_draws_emax):
         aux[x, 0] = (
