@@ -21,19 +21,151 @@ from norpy import (
     simulate,
     return_simulated_shocks,
 )
+
 from norpy import get_random_model_specification, get_model_obj
-from norpy import create_state_space, return_immediate_rewards
-from norpy import get_random_model_specification, get_model_obj
 
 
-def random_model_object():
-    model_object = get_model_obj(get_random_model_specification())
-    return model_object
+def test_state_space_1():
+    input_output_state_space = _input_output_state_space()
+    assert np.any(
+        np.all(
+            input_output_state_space[0][input_output_state_space[2] - 1]
+            == input_output_state_space[1],
+            axis=1,
+        )
+    )
 
 
-def input_output_state_space():
+def test_state_space_2():
+    input_not_output_state_space = _input_not_output_state_space()
+    assert (
+        np.any(
+            np.all(
+                input_not_output_state_space[0][
+                    input_not_output_state_space[2] - 1
+                ].reshape(input_not_output_state_space[3], 4)
+                == input_not_output_state_space[1],
+                axis=1,
+            )
+        )
+        == False
+    )
 
-    model_object = random_model_object()
+
+def test_state_space_3():
+    input_output_size = _input_output_size()
+    assert input_output_size[3].max() == input_output_size[2]
+
+
+def test_state_space_dimension():
+    input_output_dimension = _input_output_dimension()
+    np.testing.assert_array_almost_equal(
+        input_output_dimension[2][input_output_dimension[3] - 1],
+        input_output_dimension[4],
+    )
+
+
+def test_immediate_rewards_home():
+    input_output_immediate_rewards_home = _input_output_immediate_rewards_home()
+    np.testing.assert_array_almost_equal(
+        input_output_immediate_rewards_home[0][
+            input_output_immediate_rewards_home[1] - 1,
+            input_output_immediate_rewards_home[3],
+            2,
+        ],
+        input_output_immediate_rewards_home[2],
+    )
+
+
+def test_immediate_rewards_educ():
+    input_output_immediate_rewards_educ = _input_output_immediate_rewards_educ()
+    np.testing.assert_array_almost_equal(
+        np.array(
+            [
+                input_output_immediate_rewards_educ[0][
+                    input_output_immediate_rewards_educ[1] - 1,
+                    input_output_immediate_rewards_educ[2],
+                    1,
+                ]
+            ]
+        ),
+        np.array([input_output_immediate_rewards_educ[3]]),
+    )
+
+
+def test_immediate_rewards_occupation():
+    input_output_immediate_rewards_occupation = (
+        _input_output_immediate_rewards_occupation()
+    )
+
+    np.testing.assert_array_almost_equal(
+        np.array(
+            [
+                input_output_immediate_rewards_occupation[0][
+                    input_output_immediate_rewards_occupation[1] - 1,
+                    input_output_immediate_rewards_occupation[2],
+                    0,
+                ]
+            ]
+        ),
+        np.array([input_output_immediate_rewards_occupation[3]]),
+    )
+
+
+def test_last_period_value_func():
+    set_up_last_period = _set_up_last_period()
+    np.testing.assert_array_almost_equal(
+        np.array([set_up_last_period[0]]),
+        np.array(
+            [set_up_last_period[1][set_up_last_period[2] - 1, set_up_last_period[3]]]
+        ),
+        decimal=1,
+    )
+
+
+def test_value_func_general():
+    set_up_any_period = _set_up_any_period()
+    np.testing.assert_array_almost_equal(
+        np.array([set_up_any_period[0]]),
+        np.array([set_up_any_period[1][set_up_any_period[2], set_up_any_period[3]]]),
+        decimal=1,
+    )
+
+
+def test_simulation_descriptives():
+    init_simulation = _init_simulation()
+    assert init_simulation[0].shape == (init_simulation[1] * init_simulation[2], 23)
+    assert init_simulation[0][(init_simulation[5] - 1) * init_simulation[1], 4] == 0
+    assert init_simulation[0][
+        (init_simulation[5] - 1) * init_simulation[1] + init_simulation[3], 2
+    ] in [1, 2, 3]
+    assert (
+        init_simulation[0][
+            (init_simulation[5] - 1) * init_simulation[1] + init_simulation[3], 17
+        ]
+        == init_simulation[4]
+    )
+
+    # assert dat[num_periods*(agent_to_check-1)+period_to_check,2]==1
+
+
+def test_simulation_with_high_work_rewards():
+    init_simulation_huge_rewards = _init_simulation_huge_rewards()
+    assert (
+        init_simulation_huge_rewards[0][
+            (init_simulation_huge_rewards[3] - 1) * init_simulation_huge_rewards[1]
+            + init_simulation_huge_rewards[2],
+            2,
+        ]
+        == 1
+    )
+    # Todo:check for high common, check agent identifier, check period ident
+
+
+# Local Functions
+def _input_output_state_space():
+
+    model_object = get_model_obj()
     state_space = create_state_space(model_object)
 
     period = np.random.randint(1, model_object.num_periods + 1)
@@ -75,18 +207,8 @@ def input_output_state_space():
     return state_space["states_all"], manual, period
 
 
-def test_state_space_1(input_output_state_space=input_output_state_space()):
-    assert np.any(
-        np.all(
-            input_output_state_space[0][input_output_state_space[2] - 1]
-            == input_output_state_space[1],
-            axis=1,
-        )
-    )
-
-
-def input_not_output_state_space():
-    model_object = random_model_object()
+def _input_not_output_state_space():
+    model_object = get_model_obj()
 
     state_space = create_state_space(model_object)
     period = np.random.randint(1, model_object.num_periods + 1)
@@ -115,23 +237,8 @@ def input_not_output_state_space():
     return state_space["states_all"], manual, period, state_space["max_states_period"]
 
 
-def test_state_space_2(input_not_output_state_space=input_not_output_state_space()):
-    assert (
-        np.any(
-            np.all(
-                input_not_output_state_space[0][
-                    input_not_output_state_space[2] - 1
-                ].reshape(input_not_output_state_space[3], 4)
-                == input_not_output_state_space[1],
-                axis=1,
-            )
-        )
-        == False
-    )
-
-
-def input_output_size():
-    model_object = random_model_object()
+def _input_output_size():
+    model_object = get_model_obj()
 
     state_space = create_state_space(model_object)
 
@@ -150,14 +257,9 @@ def input_output_size():
     )
 
 
-def test_state_space_3(input_output_size=input_output_size()):
-    assert input_output_size[3].max() == input_output_size[2]
-
-
-def input_output_dimension():
+def _input_output_dimension():
     model_object = get_model_obj(get_random_model_specification())
     state_space = create_state_space(model_object, True)
-
     state_space["states_all"] = state_space["states_all"][
         :, : state_space["max_states_period"] + 1, :
     ]
@@ -183,14 +285,7 @@ def input_output_dimension():
     )
 
 
-def test_state_space_dimension(input_output_dimension=input_output_dimension()):
-    np.testing.assert_array_almost_equal(
-        input_output_dimension[2][input_output_dimension[3] - 1],
-        input_output_dimension[4],
-    )
-
-
-def input_output_immediate_rewards_home():
+def _input_output_immediate_rewards_home():
 
     model_object = get_model_obj(
         get_random_model_specification(
@@ -241,20 +336,7 @@ def input_output_immediate_rewards_home():
     return immediate_rewards, period_to_check, manually_calculated_result, k_to_check
 
 
-def test_immediate_rewards_home(
-    input_output_immediate_rewards_home=input_output_immediate_rewards_home()
-):
-    np.testing.assert_array_almost_equal(
-        input_output_immediate_rewards_home[0][
-            input_output_immediate_rewards_home[1] - 1,
-            input_output_immediate_rewards_home[3],
-            2,
-        ],
-        input_output_immediate_rewards_home[2],
-    )
-
-
-def input_output_immediate_rewards_educ():
+def _input_output_immediate_rewards_educ():
 
     model_object = get_model_obj(
         get_random_model_specification(
@@ -341,24 +423,7 @@ def input_output_immediate_rewards_educ():
     return immediate_rewards, period_to_check, k_to_check, manually_calculated_result
 
 
-def test_immediate_rewards_educ(
-    input_output_immediate_rewards_educ=input_output_immediate_rewards_educ()
-):
-    np.testing.assert_array_almost_equal(
-        np.array(
-            [
-                input_output_immediate_rewards_educ[0][
-                    input_output_immediate_rewards_educ[1] - 1,
-                    input_output_immediate_rewards_educ[2],
-                    1,
-                ]
-            ]
-        ),
-        np.array([input_output_immediate_rewards_educ[3]]),
-    )
-
-
-def input_output_immediate_rewards_occupation():
+def _input_output_immediate_rewards_occupation():
 
     model_object = get_model_obj(
         get_random_model_specification(
@@ -443,30 +508,7 @@ def input_output_immediate_rewards_occupation():
     return immediate_rewards, period_to_check, k_to_check, manually_calculated_result
 
 
-def test_immediate_rewards_occupation(
-    input_output_immediate_rewards_occupation=input_output_immediate_rewards_occupation()
-):
-
-    np.testing.assert_array_almost_equal(
-        np.array(
-            [
-                input_output_immediate_rewards_occupation[0][
-                    input_output_immediate_rewards_occupation[1] - 1,
-                    input_output_immediate_rewards_occupation[2],
-                    0,
-                ]
-            ]
-        ),
-        np.array([input_output_immediate_rewards_occupation[3]]),
-    )
-
-
-def random_model_object():
-    model_object = get_model_obj(get_random_model_specification())
-    return model_object
-
-
-def set_up_last_period():
+def _set_up_last_period():
 
     # We want to set up a basic testing infrastructure for the state space creation.
     model_object = get_model_obj(
@@ -535,17 +577,7 @@ def set_up_last_period():
     return manual_result, periods_emax, model_object.num_periods, k_to_check
 
 
-def test_last_period_value_func(set_up_last_period=set_up_last_period()):
-    np.testing.assert_array_almost_equal(
-        np.array([set_up_last_period[0]]),
-        np.array(
-            [set_up_last_period[1][set_up_last_period[2] - 1, set_up_last_period[3]]]
-        ),
-        decimal=1,
-    )
-
-
-def set_up_any_period():
+def _set_up_any_period():
     model_object = get_model_obj(
         get_random_model_specification(
             constr={"num_types": 4, "type_spec_shifts": np.zeros(12).reshape(4, 3)}
@@ -642,16 +674,7 @@ def set_up_any_period():
     return manual_result, periods_emax, period_to_check, k_to_check
 
 
-def test_value_func_general(set_up_any_period=set_up_any_period()):
-
-    np.testing.assert_array_almost_equal(
-        np.array([set_up_any_period[0]]),
-        np.array([set_up_any_period[1][set_up_any_period[2], set_up_any_period[3]]]),
-        decimal=1,
-    )
-
-
-def init_simulation(constr=False):
+def _init_simulation(constr=False):
     model_object = get_model_obj(
         get_random_model_specification(
             constr={"num_types": 4, "type_spec_shifts": np.zeros(12).reshape(4, 3)}
@@ -672,23 +695,7 @@ def init_simulation(constr=False):
     )
 
 
-def test_simulation_descriptives(init_simulation=init_simulation()):
-    assert init_simulation[0].shape == (init_simulation[1] * init_simulation[2], 23)
-    assert init_simulation[0][(init_simulation[5] - 1) * init_simulation[1], 4] == 0
-    assert init_simulation[0][
-        (init_simulation[5] - 1) * init_simulation[1] + init_simulation[3], 2
-    ] in [1, 2, 3]
-    assert (
-        init_simulation[0][
-            (init_simulation[5] - 1) * init_simulation[1] + init_simulation[3], 17
-        ]
-        == init_simulation[4]
-    )
-
-    # assert dat[num_periods*(agent_to_check-1)+period_to_check,2]==1
-
-
-def init_simulation_huge_rewards():
+def _init_simulation_huge_rewards():
     model_object = get_model_obj(
         get_random_model_specification(
             constr={
@@ -705,17 +712,3 @@ def init_simulation_huge_rewards():
     period_to_check = np.random.randint(0, model_object.num_periods - 1)
     # print(dat[num_periods*(agent_to_check-1)+period_to_check,2])
     return dat, model_object.num_periods, period_to_check, agent_to_check
-
-
-def test_simulation_with_high_work_rewards(
-    init_simulation_huge_rewards=init_simulation_huge_rewards()
-):
-    assert (
-        init_simulation_huge_rewards[0][
-            (init_simulation_huge_rewards[3] - 1) * init_simulation_huge_rewards[1]
-            + init_simulation_huge_rewards[2],
-            2,
-        ]
-        == 1
-    )
-    # Todo:check for high common, check agent identifier, check period ident
