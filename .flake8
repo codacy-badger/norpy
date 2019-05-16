@@ -1,3 +1,0 @@
-[flake8]
-ignore = E501, W503, F811, E712, F821, E251
-exclude = norpy/.bld,norpy/.waf3-2.0.15-ff6573b86ad5ff5d449c8852ad58b8bc , submodules, norpy/__init__.py, norpy/norpy_config.py
