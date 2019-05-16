@@ -48,7 +48,7 @@ def test_state_space_2():
                 axis=1,
             )
         )
-        == False
+        is not True
     )
 
 

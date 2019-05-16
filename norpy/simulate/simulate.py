@@ -57,7 +57,7 @@ def return_immediate_rewards(model_object, state_space_info):
 
 def return_simulated_shocks(model_object, simulation=False):
 
-    if simulation == True:
+    if simulation is True:
         args = (
             np.zeros(3),
             model_object.shocks_cov,
