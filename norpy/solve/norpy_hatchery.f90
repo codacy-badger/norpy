@@ -61,7 +61,7 @@ SUBROUTINE f2py_create_state_space(states_all, states_number_period, mapping_sta
     states_all = MISSING_INT
 
     ! ! Construct state space by periods
-    DO period = 1, (num_periods)
+    DO period = 1, num_periods
 
         ! Count admissible realizations of state space by period
         k = 1
@@ -210,7 +210,7 @@ SUBROUTINE f2py_calculate_immediate_rewards(periods_rewards_systematic, num_peri
     ! Calculate systematic instantaneous rewards
     DO period = model_spec%num_periods, 1, -1
 
-        DO k = 1, (states_number_period(period))
+        DO k = 1, states_number_period(period)
 
             ! Distribute state space
             exp = states_all(period, k, 1)
@@ -322,13 +322,13 @@ SUBROUTINE f2py_backward_induction(periods_emax, states_all, states_number_perio
 
     periods_emax = MISSING_FLOAT
     
-    DO period = (model_spec%num_periods), 1, -1
+    DO period = model_spec%num_periods, 1, -1
    
 
 
         draws_emax_risk = periods_draws_emax(period , :, :)
 
-        DO k = 1, (states_number_period(period))
+        DO k = 1, states_number_period(period)
 
             rewards_systematic = periods_rewards_systematic(period, k , :)
             exp = states_all(period , k, 1)
