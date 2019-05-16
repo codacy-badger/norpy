@@ -135,7 +135,7 @@ class ModelSpec(typing.NamedTuple):
             What are spec 1 and spec2 ?
         """
         assert isinstance(other, type(self))
-        assert set(spec_1._fields) == set(spec_2._fields)
+        assert set(self._fields) == set(other._fields)
         for field in self._fields:
             if getattr(self, field) != getattr(other, field):
                 return False
