@@ -132,8 +132,7 @@ class ModelSpec(typing.NamedTuple):
 
         Returns:
             A boolean corresponding to equality of specifications.
-            What are spec 1 and spec2 ?
-        """
+           """
         assert isinstance(other, type(self))
         assert set(self._fields) == set(other._fields)
         for field in self._fields:
