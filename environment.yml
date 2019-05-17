@@ -16,4 +16,5 @@ dependencies:
   - flake8
   - pyyaml
   - codecov
-  - pre-commit
+  - pip:
+      - pre-commit

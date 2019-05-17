@@ -19,7 +19,7 @@ def run_pr_testing(robustness, property_, regression):
     subprocess.check_call(cmd, shell=True, cwd=SCRIPT_DIR + "/regression")
 
     print(" \n ... running property tests")
-    cmd = "./run.py --request run --hours {:}".format(property_)
+    cmd = "./run.py --hours {:}".format(property_)
     subprocess.check_call(cmd, shell=True, cwd=SCRIPT_DIR + "/property")
 
 
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-reg",
         "--regression",
-        type=float,
+        type=int,
         help="number of regression tests to run",
         default=1,
         dest="regression",
