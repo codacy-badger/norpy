@@ -7,7 +7,6 @@ from norpy.solve.norpy_hatchery import f2py_calculate_immediate_rewards
 from norpy.solve.norpy_hatchery import f2py_create_state_space
 from norpy.solve.norpy_hatchery import f2py_backward_induction
 from norpy.solve.norpy_hatchery import f2py_simulate
-
 from norpy.simulate.simulate_auxiliary import LARGE_FLOAT
 
 
